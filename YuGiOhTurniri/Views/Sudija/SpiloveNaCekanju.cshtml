@@ -1,0 +1,46 @@
+﻿@model List<YuGiOhTurniri.Models.SpiloveNaRevizijuVM>
+
+@{
+    ViewBag.Title = "Spilovi na Reviziji";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-header">
+    <h1 class="page-title">Spilovi na Reviziji</h1>
+    <p class="page-subtitle">Pregled i odobravanje spilova takmicara</p>
+</div>
+
+@if (Model == null || Model.Count == 0)
+{
+    if (TempData["Poruka"] == null)
+    {
+        <div class="alert alert-success">
+            Svi spilovi su pregledani! Nema novih zahtjeva.
+        </div>
+    }
+}
+else
+{
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
+        @foreach (var spil in Model)
+        {
+            <div class="card">
+                <div class="card-header">
+                    <h3>@spil.Naziv</h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>Takmičar:</strong> @spil.VlasnikIme @spil.VlasnikPrezime</p>
+                    <p><strong>Format:</strong> @spil.Format</p>
+                    <p><strong>Arhetip:</strong> @spil.Arhetip</p>
+                    <p><strong>Kreirano:</strong> @spil.DatumKreiranja.ToString("dd.MM.yyyy")</p>
+                    <p><strong>Status:</strong> <span class="badge badge-warning">Na cekanju</span></p>
+                </div>
+                <div style="padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                    <a href="@Url.Action("PregledajSpil", "Sudija", new { id = spil.SpilID })" class="btn btn-primary">
+                        Pregledaj Detaljno
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+}

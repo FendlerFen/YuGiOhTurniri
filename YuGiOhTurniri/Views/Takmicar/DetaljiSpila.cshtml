@@ -1,0 +1,434 @@
+@model YuGiOhTurniri.Models.DetaljiSpilVM
+
+@{
+    ViewBag.Title = "Detalji Spila";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .deck-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .deck-column {
+        border: 2px solid #667eea;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .deck-column-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem;
+        font-weight: bold;
+        text-align: center;
+        font-size: 1.1rem;
+    }
+
+    .deck-column-body {
+        padding: 1rem;
+    }
+
+    .card-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        background: #f7fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+    }
+
+    .card-name {
+        flex: 1;
+        word-break: break-word;
+    }
+
+    .card-type {
+        background: #667eea;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 3px;
+        font-size: 0.75rem;
+        font-weight: bold;
+        margin: 0 0.25rem;
+        min-width: 50px;
+        text-align: center;
+    }
+
+    .card-qty {
+        background: #667eea;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        font-weight: bold;
+        margin: 0 0.5rem;
+    }
+
+    .deck-total {
+        background: #e3f2fd;
+        padding: 1rem;
+        text-align: center;
+        font-weight: bold;
+        border-top: 2px solid #667eea;
+        margin-top: 1rem;
+    }
+
+    .progress-bar-container {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .progress-bar {
+        flex: 1;
+        background: #e0e0e0;
+        height: 20px;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+
+    .main-deck-bar { background: linear-gradient(90deg, #1976d2 0%, #1565c0 100%); }
+    .extra-deck-bar { background: linear-gradient(90deg, #7b1fa2 0%, #6a1b9a 100%); }
+    .side-deck-bar { background: linear-gradient(90deg, #388e3c 0%, #2e7d32 100%); }
+
+    .deck-column-footer {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .spil-info {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .info-label {
+        font-weight: bold;
+        color: #333;
+    }
+
+    .info-value {
+        color: #666;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        font-weight: bold;
+    }
+
+    .badge-warning {
+        background: #ffc107;
+        color: #333;
+    }
+
+    .badge-success {
+        background: #28a745;
+        color: white;
+    }
+
+    .badge-danger {
+        background: #dc3545;
+        color: white;
+    }
+
+    .napomena-box {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        border-radius: 4px;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        justify-content: center;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-primary {
+        background: #667eea;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #5568d3;
+    }
+
+    .btn-secondary {
+        background: #cbd5e0;
+        color: #333;
+    }
+
+    .btn-secondary:hover {
+        background: #a0aec0;
+    }
+</style>
+
+<style media="print">
+    .action-buttons {
+        display: none;
+    }
+
+    .page-header {
+        page-break-after: avoid;
+    }
+
+    .deck-grid {
+        page-break-inside: avoid;
+    }
+
+    body {
+        font-size: 12pt;
+    }
+</style>
+
+<div style="max-width: 1200px; margin: 0 auto;">
+    <div class="page-header">
+        <h1 class="page-title">@Model.Naziv</h1>
+        <p class="page-subtitle">Format: @Model.Format | Arhetip: @Model.Arhetip</p>
+    </div>
+
+    <!-- INFORMACIJE O SPILU -->
+    <div class="spil-info">
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">Format:</span>
+                <span class="info-value">@Model.Format</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Arhetip:</span>
+                <span class="info-value">@Model.Arhetip</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Kreiran:</span>
+                <span class="info-value">@Model.DatumKreiranja.ToString("dd.MM.yyyy")</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Status:</span>
+                <span class="info-value">
+                    @if (Model.Status == "Na cekanju")
+                    {
+                        <span class="badge badge-warning">Na cekanju (ceka pregled)</span>
+                    }
+                    else if (Model.Status == "Odobren")
+                    {
+                        <span class="badge badge-success">Odobren</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-danger">Odbijen</span>
+                    }
+                </span>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.NapomenaSudije))
+        {
+            <div class="napomena-box">
+                <strong>Napomena Sudije:</strong><br />
+                @Model.NapomenaSudije
+            </div>
+        }
+    </div>
+
+    <!-- KARTE PO SEKCIJAMA -->
+    <div class="deck-grid">
+        <!-- MAIN DECK -->
+        <div class="deck-column">
+            <div class="deck-column-header">Main Deck</div>
+            <div class="deck-column-body">
+                @{
+                    var mainKarte = Model?.Karte != null ? Model.Karte.Where(k => k.Sekcija == "Main").ToList() : new List<YuGiOhTurniri.Models.KartaUSpiluVM>();
+                    var mainCount = mainKarte.Sum(k => k.Kolicina);
+                    // Sortiraj karte
+                    var sortiraneMainKarte = mainKarte.OrderBy(k =>
+                        k.TipKarte == "Monster" ? 1 :
+                        k.TipKarte == "Spell" ? 2 :
+                        k.TipKarte == "Trap" ? 3 : 4
+                    ).ToList();
+                }
+
+                @if (sortiraneMainKarte.Count > 0)
+                {
+                    foreach (var karta in sortiraneMainKarte)
+                    {
+                        <div class="card-item">
+                            <span class="card-name">@karta.NazivKarte</span>
+                            @if (!string.IsNullOrEmpty(karta.TipKarte))
+                            {
+                                <span class="card-type">@karta.TipKarte</span>
+                            }
+                            <span class="card-qty">x@(karta.Kolicina)</span>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p style="text-align: center; color: #999; margin: 1rem 0;">Nema karata</p>
+                }
+
+                <div class="deck-total">
+                    Ukupno: @mainCount
+                </div>
+            </div>
+            <div class="deck-column-footer">
+                @if (mainCount >= 40 && mainCount <= 60)
+                {
+                    <span style="color: #48bb78; font-weight: bold;">VALIDNO</span>
+                }
+                else
+                {
+                    <span style="color: #f56565; font-weight: bold;">INVALIDNO (40-60)</span>
+                }
+            </div>
+        </div>
+
+        <!-- EXTRA DECK -->
+        <div class="deck-column">
+            <div class="deck-column-header">Extra Deck</div>
+            <div class="deck-column-body">
+                @{
+                    var extraKarte = Model?.Karte != null ? Model.Karte.Where(k => k.Sekcija == "Extra").ToList() : new List<YuGiOhTurniri.Models.KartaUSpiluVM>();
+                    var extraCount = extraKarte.Sum(k => k.Kolicina);
+                    // Sortiraj karte
+                    var sortiraneExtraKarte = extraKarte.OrderBy(k =>
+                        k.TipKarte == "Monster" ? 1 :
+                        k.TipKarte == "Spell" ? 2 :
+                        k.TipKarte == "Trap" ? 3 : 4
+                    ).ToList();
+                }
+
+                @if (sortiraneExtraKarte.Count > 0)
+                {
+                    foreach (var karta in sortiraneExtraKarte)
+                    {
+                        <div class="card-item">
+                            <span class="card-name">@karta.NazivKarte</span>
+                            <span class="card-qty">x@(karta.Kolicina)</span>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p style="text-align: center; color: #999; margin: 1rem 0;">Nema karata</p>
+                }
+
+                <div class="deck-total">
+                    Ukupno: @extraCount
+                </div>
+            </div>
+            <div class="deck-column-footer">
+                @if (extraCount <= 15)
+                {
+                    <span style="color: #48bb78; font-weight: bold;">VALIDNO</span>
+                }
+                else
+                {
+                    <span style="color: #f56565; font-weight: bold;">INVALIDNO (max 15)</span>
+                }
+            </div>
+        </div>
+
+        <!-- SIDE DECK -->
+        <div class="deck-column">
+            <div class="deck-column-header">Side Deck</div>
+            <div class="deck-column-body">
+                @{
+                    var sideKarte = Model?.Karte != null ? Model.Karte.Where(k => k.Sekcija == "Side").ToList() : new List<YuGiOhTurniri.Models.KartaUSpiluVM>();
+                    var sideCount = sideKarte.Sum(k => k.Kolicina);
+                    // Sortiraj karte
+                    var sortiraniSideKarte = sideKarte.OrderBy(k =>
+                        k.TipKarte == "Monster" ? 1 :
+                        k.TipKarte == "Spell" ? 2 :
+                        k.TipKarte == "Trap" ? 3 : 4
+                    ).ToList();
+                }
+
+                @if (sortiraniSideKarte.Count > 0)
+                {
+                    foreach (var karta in sortiraniSideKarte)
+                    {
+                        <div class="card-item">
+                            <span class="card-name">@karta.NazivKarte</span>
+                            <span class="card-qty">x@(karta.Kolicina)</span>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p style="text-align: center; color: #999; margin: 1rem 0;">Nema karata</p>
+                }
+
+                <div class="deck-total">
+                    Ukupno: @sideCount
+                </div>
+            </div>
+            <div class="deck-column-footer">
+                @if (sideCount <= 15)
+                {
+                    <span style="color: #48bb78; font-weight: bold;">VALIDNO</span>
+                }
+                else
+                {
+                    <span style="color: #f56565; font-weight: bold;">INVALIDNO (max 15)</span>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- AKCIJE -->
+    <div class="action-buttons">
+        <a href="@Url.Action("IzmeniSpil", "Takmicar", new { id = Model.SpilID })" class="btn btn-primary">Izmeni Spil</a>
+        <button type="button" class="btn btn-success" onclick="window.print()">Odstampaj Spil</button>
+        @if (Model.Status == "Na cekanju")
+        {
+            <a href="@Url.Action("ObrisiSpil", "Takmicar", new { id = Model.SpilID })" class="btn btn-danger" onclick="return confirm('Jeste li sigurni da zelite da obrisete spil?')">Obrisi Spil</a>
+        }
+        <a href="@Url.Action("MojiSpilovi", "Takmicar")" class="btn btn-secondary">Nazad na Spilove</a>
+    </div>
+</div>

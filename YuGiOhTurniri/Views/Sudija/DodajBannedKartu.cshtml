@@ -1,0 +1,48 @@
+@model YuGiOhTurniri.Models.DodajBannedKartuVM
+
+@{
+    ViewBag.Title = "Dodaj Zabranjenu Kartu";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-header">
+    <h1 class="page-title">Dodaj Zabranjenu Kartu</h1>
+    <p class="page-subtitle">Upravljanje Yu-Gi-Oh! Ban Listom</p>
+</div>
+
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <div class="card-body">
+        @using (Html.BeginForm("DodajBannedKartu", "Sudija", FormMethod.Post, new { @class = "form-validation" }))
+        {
+            @Html.ValidationSummary(true, "", new { @class = "form-error" })
+
+            <div class="form-group">
+                <label>Naziv Karte</label>
+                @Html.TextBoxFor(x => x.NazivKarte, new { @class = "form-control", placeholder = "npr: Blue Eyes White Dragon", required = "required" })
+                @Html.ValidationMessageFor(x => x.NazivKarte, "", new { @class = "form-error" })
+            </div>
+
+            <div class="form-group">
+                <label>Status Ban-a</label>
+                @Html.DropDownListFor(x => x.Status, new SelectList(new[] 
+                { 
+                    new { Value = "Zabranjena", Text = "Zabranjena (0 kopija)" },
+                    new { Value = "Limitirana", Text = "Limitirana (1 kopija)" },
+                    new { Value = "SemiLimitirana", Text = "Semi-Limited (2 kopije)" }
+                }, "Value", "Text"), "-- Odaberite status --", new { @class = "form-control", required = "required" })
+                @Html.ValidationMessageFor(x => x.Status, "", new { @class = "form-error" })
+            </div>
+
+            <div class="form-group">
+                <label>Razlog (opciono)</label>
+                @Html.TextAreaFor(x => x.Razlog, new { @class = "form-control", placeholder = "Zasto je karta zabranjena?" })
+                @Html.ValidationMessageFor(x => x.Razlog, "", new { @class = "form-error" })
+            </div>
+
+            <button type="submit" class="btn btn-success btn-block">Dodaj na Ban List</button>
+            <a href="@Url.Action("BannedKarte", "Sudija")" class="btn btn-secondary btn-block" style="margin-top: 0.5rem;">Nazad</a>
+        }
+    </div>
+</div>
+
+<script src="~/Scripts/validacija.js"></script>

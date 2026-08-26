@@ -1,0 +1,312 @@
+﻿@model KlasePodataka.TurnirKlasa
+
+@{
+    ViewBag.Title = "Detalji Turnira";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-header">
+    <h1 class="page-title">@Model.Naziv</h1>
+    <p class="page-subtitle">Detalji vaseg turnira</p>
+</div>
+
+<div class="row">
+    <div style="flex: 1;">
+        <div class="card">
+            <div class="card-header">
+                <strong>Informacije o turniru</strong>
+            </div>
+            <div class="card-body">
+                <p><strong>ID:</strong> @Model.TurnirID</p>
+                <p><strong>Lokacija:</strong> @Model.Lokacija</p>
+                <p><strong>Format:</strong> @Model.Format</p>
+                <p><strong>Datum:</strong> @Model.DatumOdrzavanja.ToString("dd.MM.yyyy")</p>
+                <p><strong>Status:</strong> 
+                    @if (Model.Status == "Otvoren")
+                    {
+                        <span class="badge badge-success">Otvoren</span>
+                    }
+                    else if (Model.Status == "Zavrsen")
+                    {
+                        <span class="badge badge-primary">Zavrsen</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-danger">Otkazan</span>
+                    }
+                </p>
+                <p><strong>Kreiraj:</strong> @Model.DatumKreiranja.ToString("dd.MM.yyyy HH:mm")</p>
+            </div>
+        </div>
+    </div>
+
+    <div style="flex: 1;">
+        <div class="card">
+            <div class="card-header">
+                <strong>Prijavljeni Takmicari (@ViewBag.BrojTakmicara)</strong>
+            </div>
+            <div class="card-body">
+                @if (ViewBag.Takmicari != null)
+                {
+                    if (ViewBag.Takmicari is System.Data.DataTable)
+                    {
+                        if (ViewBag.Takmicari.Rows.Count > 0)
+                        {
+                            <table class="table table-sm table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Redosled</th>
+                                        <th>Ime i Prezime</th>
+                                        <th>Spil</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        int redosled = 1;
+                                        foreach (System.Data.DataRow row in ViewBag.Takmicari.Rows)
+                                        {
+                                            <tr>
+                                                <td>@redosled</td>
+                                                <td>@row["Ime"] @row["Prezime"]</td>
+                                                <td>@row["SpilNaziv"]</td>
+                                            </tr>
+                                            redosled++;
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <p class="text-muted">Nema prijavljenih takmičara.</p>
+                        }
+                    }
+                    else
+                    {
+                        if (ViewBag.Takmicari.Count > 0)
+                        {
+                            <table class="table table-sm table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Redosled</th>
+                                        <th>Ime i Prezime</th>
+                                        <th>Spil</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        int redosled = 1;
+                                        foreach (var takmicari in ViewBag.Takmicari)
+                                        {
+                                            <tr>
+                                                <td>@redosled</td>
+                                                <td>@takmicari.Ime @takmicari.Prezime</td>
+                                                <td>@takmicari.SpilNaziv</td>
+                                            </tr>
+                                            redosled++;
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <p class="text-muted">Nema prijavljenih takmičara.</p>
+                        }
+                    }
+                }
+                else
+                {
+                    <p class="text-muted">Nema prijavljenih takmičara.</p>
+                }
+            </div>
+        </div>
+
+        @if (ViewBag.Pobednici != null && ViewBag.Pobednici.Count > 0)
+        {
+            <div class="card" style="margin-top: 1rem;">
+                <div class="card-header">
+                    <strong>Pobednici</strong>
+                </div>
+                <div class="card-body">
+                    @foreach (var pobednik in ViewBag.Pobednici)
+                    {
+                        if (pobednik.Mesto == 1)
+                        {
+                            <div style="padding: 1rem; background: #fff9e6; border-left: 4px solid #ffd700; margin-bottom: 0.5rem;">
+                                <p><strong>Prvo mesto:</strong> @pobednik.Ime @pobednik.Prezime</p>
+                                <p class="text-muted">Pobeda: @pobednik.BrojPobeda</p>
+                            </div>
+                        }
+                        else if (pobednik.Mesto == 2)
+                        {
+                            <div style="padding: 1rem; background: #f0f0f0; border-left: 4px solid #c0c0c0; margin-bottom: 0.5rem;">
+                                <p><strong>Drugo mesto:</strong> @pobednik.Ime @pobednik.Prezime</p>
+                                <p class="text-muted">Pobeda: @pobednik.BrojPobeda</p>
+                            </div>
+                        }
+                        else if (pobednik.Mesto == 3)
+                        {
+                            <div style="padding: 1rem; background: #fff5e6; border-left: 4px solid #cd7f32; margin-bottom: 0.5rem;">
+                                <p><strong>Trece mesto:</strong> @pobednik.Ime @pobednik.Prezime</p>
+                                <p class="text-muted">Pobeda: @pobednik.BrojPobeda</p>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="card" style="margin-top: 1rem;">
+                <div class="card-header">
+                    <strong>Pobednici</strong>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Rezultati turnira jos nisu dostupni.</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+    @if (ViewBag.IsPublicView == true)
+    {
+        <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">Nazad na pocetnu</a>
+    }
+    else
+    {
+        <a href="@Url.Action("MojiTurniri", "Organizator")" class="btn btn-secondary">Nazad na turnire</a>
+
+        if (Model.Status == "Otvoren")
+        {
+            <a href="@Url.Action("IzmeniTurnir", "Organizator", new { id = Model.TurnirID })" class="btn btn-primary">Izmeni turnir</a>
+            <a href="@Url.Action("ObrisiTurnir", "Organizator", new { id = Model.TurnirID })" class="btn btn-danger" onclick="return confirm('Da li ste sigurni da zelite da obrisete turnir?');">Obrisi turnir</a>
+            <a href="@Url.Action("ProglasiPobednike", "Organizator", new { id = Model.TurnirID })" class="btn btn-warning">Proglasi Pobednike</a>
+        }
+
+        <a href="@Url.Action("StampajTurnir", "Organizator", new { id = Model.TurnirID })" class="btn btn-info" onclick="window.print();">Stampaj turnir</a>
+    }
+</div>
+
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border-radius: 8px;
+    }
+
+    .page-title {
+        margin: 0;
+        font-size: 2rem;
+    }
+
+    .page-subtitle {
+        margin: 0.5rem 0 0 0;
+        opacity: 0.9;
+    }
+
+    .row {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+    }
+
+    .card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        background-color: white;
+    }
+
+    .card-header {
+        background-color: #f5f5f5;
+        padding: 1rem;
+        border-bottom: 1px solid #ddd;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .badge-success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .badge-primary {
+        background-color: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .badge-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .text-muted {
+        color: #6c757d;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn:hover {
+        opacity: 0.9;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .btn-warning {
+        background-color: #ffc107;
+        color: #333;
+    }
+
+    .btn-info {
+        background-color: #17a2b8;
+        color: white;
+    }
+
+    @@media print {
+        .page-header, .btn, a {
+            display: none !important;
+        }
+        body {
+            padding: 0;
+            margin: 0;
+        }
+    }
+</style>

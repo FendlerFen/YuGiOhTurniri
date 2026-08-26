@@ -1,0 +1,152 @@
+﻿@model List<YuGiOhTurniri.Models.MojiTurniriVM>
+
+@{
+    ViewBag.Title = "Moji Turniri";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    @@media print {
+        /* Sakrij filter i dugmadi pri štampi */
+        .card.mb-3 { display: none; }
+        .mb-3 { display: none; }
+        .page-header { margin-bottom: 20px; }
+        .page-header h1 { font-size: 24px; margin-bottom: 5px; }
+        .page-header p { font-size: 14px; color: #666; }
+
+        /* Prilagodi grid za štampu */
+        div[style*="grid-template-columns"] {
+            display: grid !important;
+            grid-template-columns: 1fr !important;
+            gap: 15px !important;
+        }
+
+        .card { 
+            page-break-inside: avoid;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        .card-body p { 
+            margin: 5px 0;
+            font-size: 12px;
+        }
+
+        /* Sakrij dugmadi pri štampi */
+        div[style*="padding: 1rem; display: flex; flex-direction"] {
+            display: none !important;
+        }
+    }
+
+    /* Hover efekti za dugmadi */
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+    }
+
+    .btn:active {
+        transform: translateY(0);
+    }
+</style>
+
+<div class="page-header">
+    <h1 class="page-title">Moji Turniri</h1>
+    <p class="page-subtitle">Upravljanje vašim turnirim</p>
+</div>
+
+<div class="mb-3">
+    <a href="@Url.Action("KreirajTurnir", "Organizator")" class="btn" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; border: none; padding: 12px 24px; border-radius: 4px; font-weight: 600; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; display: inline-block; box-shadow: 0 2px 8px rgba(17, 153, 142, 0.4);">Kreiraj novi turnir</a>
+</div>
+
+<!-- FILTER (Poslovna Logika iz JSON parametara) -->
+<div class="card mb-3" style="border: 1px solid #e3e6f0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600; border-radius: 8px 8px 0 0; padding: 12px 15px;">
+        <strong>Filtri i Pretraga</strong>
+    </div>
+    <div class="card-body" style="padding: 15px;">
+        <form method="get" action="@Url.Action("MojiTurniri", "Organizator")" class="form-inline" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;">
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; flex: 1;">
+                <div class="form-group" style="margin: 0;">
+                    <label for="format" style="margin-right: 8px; font-weight: 500; color: #333;">Format:</label>
+                    <select name="format" id="format" class="form-control" style="border: 2px solid #e3e6f0; border-radius: 4px; padding: 8px 12px; min-width: 150px; transition: border-color 0.3s;">
+                        <option value="">-- Svi Formati --</option>
+                        @if (ViewBag.Formati != null)
+                        {
+                            foreach (var f in ViewBag.Formati)
+                            {
+                                <option value="@f" @(ViewBag.IzabranFormat == f ? "selected" : "")>@f</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin: 0;">
+                    <label for="pretraga" style="margin-right: 8px; font-weight: 500; color: #333;">Pretraga:</label>
+                    <input type="text" name="pretraga" id="pretraga" class="form-control" placeholder="Naziv turnira..." value="@ViewBag.Pretraga" style="border: 2px solid #e3e6f0; border-radius: 4px; padding: 8px 12px; min-width: 200px; transition: border-color 0.3s;" />
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button type="submit" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: 600; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);">
+                    Filtriraj
+                </button>
+                <a href="@Url.Action("MojiTurniri", "Organizator")" class="btn" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: 600; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; display: inline-block; box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);">
+                    Ocisti
+                </a>
+                <button type="button" onclick="window.print();" class="btn" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: 600; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 2px 8px rgba(245, 87, 108, 0.4);">
+                    Stampaj Sve
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model == null || Model.Count == 0)
+{
+    <div class="alert alert-info">
+        Nemate kreiranih turnira. <a href="@Url.Action("KreirajTurnir", "Organizator")">Kreirajte prvi turnir</a>
+    </div>
+}
+else
+{
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
+        @foreach (var turnir in Model)
+        {
+            <div class="card">
+                <div class="card-header">
+                    <h3>@turnir.Naziv</h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>Lokacija:</strong> @turnir.Lokacija</p>
+                    <p><strong>Format:</strong> @turnir.Format</p>
+                    <p><strong>Datum:</strong> @turnir.DatumOdrzavanja.ToString("dd.MM.yyyy")</p>
+                    <p><strong>Status:</strong> 
+                        @if (turnir.Status == "Otvoren")
+                        {
+                            <span class="badge badge-success">Otvoren</span>
+                        }
+                        else if (turnir.Status == "Zavrsen")
+                        {
+                            <span class="badge badge-primary">Zavrsen</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-danger">Otkazan</span>
+                        }
+                    </p>
+                </div>
+                <div style="padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                    <a href="@Url.Action("DetaljiTurnira", "Organizator", new { id = turnir.TurnirID })" class="btn" style="padding: 10px 16px; border-radius: 4px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; text-decoration: none; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3); text-align: center;">Detalji Turnira</a>
+                    @if (turnir.Status == "Otvoren")
+                    {
+                        <a href="@Url.Action("ProglasiPobednike", "Organizator", new { id = turnir.TurnirID })" class="btn" style="padding: 10px 16px; border-radius: 4px; background: #f39c12; color: white; border: none; text-decoration: none; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 2px 6px rgba(243, 156, 18, 0.3); text-align: center;">Proglasi Pobednike</a>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<div style="margin-top: 2rem;">
+    <a href="@Url.Action("Kontrolna", "Organizator")" class="btn btn-secondary">Nazad na kontrolnu ploču</a>
+</div>

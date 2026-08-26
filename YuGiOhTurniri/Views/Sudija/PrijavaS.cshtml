@@ -1,0 +1,56 @@
+@{
+    ViewBag.Title = "Prijava Sudije";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="auth-container">
+    <div class="auth-card">
+        <h1 class="auth-title">Prijava Sudije</h1>
+
+        @if (ViewBag.Greska != null)
+        {
+            <div class="alert alert-danger">@ViewBag.Greska</div>
+        }
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">
+                <strong>Greske u formi:</strong>
+                @foreach (var error in ViewData.ModelState.Values)
+                {
+                    foreach (var err in error.Errors)
+                    {
+                        <p>@err.ErrorMessage</p>
+                    }
+                }
+            </div>
+        }
+
+        @using (Html.BeginForm("PrijavaS", "Sudija", FormMethod.Post, new { @class = "form-validation" }))
+        {
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="email" placeholder="Unesite email" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label>Lozinka</label>
+                <input type="password" name="lozinka" placeholder="Unesite lozinku" class="form-control" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Prijavi se</button>
+        }
+
+        <div class="auth-link">
+            <small>Za pristup koristi email i lozinku koju ste dobili</small>
+        </div>
+
+        <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid #ddd;">
+
+        <div style="background: #f0f0f0; padding: 1rem; border-radius: 4px; margin-top: 1rem;">
+            <small><strong>Test Podaci:</strong></small><br>
+            <small>Email: <code style="background: white; padding: 0.2rem 0.4rem; border-radius: 3px;">SudijaJV@gmail.com</code></small><br>
+            <small>Lozinka: <code style="background: white; padding: 0.2rem 0.4rem; border-radius: 3px;">Loz123</code></small>
+        </div>
+    </div>
+</div>

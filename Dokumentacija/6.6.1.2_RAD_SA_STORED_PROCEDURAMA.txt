@@ -1,0 +1,219 @@
+6.6.1.2. Rad sa stored procedurama
+
+Stored procedure pristup koristi SQL upit/komande sa parametrima za ?itanje i pisanje u bazu.
+Ban lista primer koristi SPBanListaDBKlasa koja sadr?i sve SQL operacije. Parametrizovani upiti
+(@naziv, @id, @datum) ?tite od SQL injection. Repozitorijum (BanListaRepozitorijumSP) delegira
+sve pozive na SPBanListaDBKlasa.
+
+???????????????????????????????????????????????????????????????????????????????????
+
+1. DATA ACCESS LAYER - SQL SA PARAMETRIMA
+
+FILE: KlasePodataka/SPBanListaDBKlasa.cs
+
+public class SPBanListaDBKlasa
+{
+    private string _konekcija;
+
+    public SPBanListaDBKlasa(string konekcija)
+    {
+        _konekcija = konekcija;
+    }
+
+    // ?itaj sve zabljene karte
+    public List<BanListaKlasa> DajBanListuSudije(int sudijaID)
+    {
+        List<BanListaKlasa> lista = new List<BanListaKlasa>();
+
+        using (SqlConnection conn = new SqlConnection(_konekcija))
+        {
+            conn.Open();
+            string sql = "SELECT BannedKartaID, NazivKarte, Razlog, DatumBana 
+                         FROM BannedKarte ORDER BY DatumBana DESC";
+
+            using (SqlCommand cmd = new SqlCommand(sql, conn))
+            {
+                cmd.CommandType = CommandType.Text;
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        lista.Add(new BanListaKlasa
+                        {
+                            BanListaID = (int)reader["BannedKartaID"],
+                            NazivKarte = reader["NazivKarte"].ToString(),
+                            DatumDodavanja = (DateTime)reader["DatumBana"]
+                        });
+                    }
+                }
+            }
+        }
+
+        return lista;
+    }
+
+    // Dodaj kartu na ban listu
+    public int DodajNaBanListu(int sudijaID, string nazivKarte)
+    {
+        using (SqlConnection conn = new SqlConnection(_konekcija))
+        {
+            conn.Open();
+            string sql = @"INSERT INTO BannedKarte (NazivKarte, Razlog, DatumBana) 
+                          VALUES (@naziv, @razlog, @datum)";
+
+            using (SqlCommand cmd = new SqlCommand(sql, conn))
+            {
+                cmd.CommandType = CommandType.Text;
+                cmd.Parameters.AddWithValue("@naziv", nazivKarte);
+                cmd.Parameters.AddWithValue("@razlog", "Dodala sudija");
+                cmd.Parameters.AddWithValue("@datum", DateTime.Now);
+
+                return cmd.ExecuteNonQuery();
+            }
+        }
+    }
+
+    // Obrisi kartu sa ban liste
+    public int ObrisiSaBanListe(int banListaID)
+    {
+        using (SqlConnection conn = new SqlConnection(_konekcija))
+        {
+            conn.Open();
+            string sql = "DELETE FROM BannedKarte WHERE BannedKartaID = @id";
+
+            using (SqlCommand cmd = new SqlCommand(sql, conn))
+            {
+                cmd.CommandType = CommandType.Text;
+                cmd.Parameters.AddWithValue("@id", banListaID);
+
+                return cmd.ExecuteNonQuery();
+            }
+        }
+    }
+
+    // Proveri da li je kartu na ban listi
+    public bool DaLiJeKartaNaBanListi(int sudijaID, string nazivKarte)
+    {
+        using (SqlConnection conn = new SqlConnection(_konekcija))
+        {
+            conn.Open();
+            string sql = "SELECT COUNT(*) as cnt FROM BannedKarte WHERE NazivKarte = @naziv";
+
+            using (SqlCommand cmd = new SqlCommand(sql, conn))
+            {
+                cmd.CommandType = CommandType.Text;
+                cmd.Parameters.AddWithValue("@naziv", nazivKarte);
+
+                int count = (int)cmd.ExecuteScalar();
+                return count > 0;
+            }
+        }
+    }
+}
+
+Svaka metoda koristi `using` iskaz za SqlConnection. SQL upiti koriste parametrizovane
+vrednosti (@naziv, @id, @datum) umesto string interpolacije. ExecuteReader() puni listu
+objekata. ExecuteNonQuery() vra?a broj uticanih redova (INSERT/UPDATE/DELETE).
+ExecuteScalar() vra?a jednu vrednost (COUNT za proveru).
+
+„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ
+
+2. REPOSITORY - DELEGIRA NA DATA ACCESS
+
+FILE: Repozitorijumi/BanListaRepozitorijumSP.cs
+
+public class BanListaRepozitorijumSP : IBanListaRepository
+{
+    private readonly string _konekcija;
+
+    public BanListaRepozitorijumSP(string konekcija)
+    {
+        _konekcija = konekcija;
+    }
+
+    public List<BanListaKlasa> DajBanListuSudije(int sudijaID)
+    {
+        SPBanListaDBKlasa db = new SPBanListaDBKlasa(_konekcija);
+        return db.DajBanListuSudije(sudijaID);
+    }
+
+    public List<BanListaKlasa> DajSvuBanListu()
+    {
+        SPBanListaDBKlasa db = new SPBanListaDBKlasa(_konekcija);
+        return db.DajBanListuSudije(0);
+    }
+
+    public int DodajNaBanListu(int sudijaID, string nazivKarte)
+    {
+        SPBanListaDBKlasa db = new SPBanListaDBKlasa(_konekcija);
+        return db.DodajNaBanListu(sudijaID, nazivKarte);
+    }
+
+    public int ObrisiSaBanListe(int banListaID)
+    {
+        SPBanListaDBKlasa db = new SPBanListaDBKlasa(_konekcija);
+        return db.ObrisiSaBanListe(banListaID);
+    }
+
+    public bool DaLiJeKartaNaBanListi(int sudijaID, string nazivKarte)
+    {
+        SPBanListaDBKlasa db = new SPBanListaDBKlasa(_konekcija);
+        return db.DaLiJeKartaNaBanListi(sudijaID, nazivKarte);
+    }
+}
+
+BanListaRepozitorijumSP je tanki sloj koji samo proslje?uje pozive na SPBanListaDBKlasa.
+Interfejs IBanListaRepository defini?e ugovor koje sve metode mora imati svaka implementacija.
+
+„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ
+
+3. KONTROLER - KORI??ENJE REPOZITORIJUMA
+
+FILE: YuGiOhTurniri/Controllers/SudijaController.cs (deo)
+
+[HttpPost]
+public ActionResult DodajNaBanListu(string nazivKarte)
+{
+    try
+    {
+        var konekcija = ConfigurationManager.ConnectionStrings["Konekcija"].ConnectionString;
+        IBanListaRepository repo = new BanListaRepozitorijumSP(konekcija);
+
+        int sudijaID = (int)Session["sudijaID"];
+
+        // Provera da li kartu ve? na listi
+        if (repo.DaLiJeKartaNaBanListi(sudijaID, nazivKarte))
+        {
+            return Json(new { uspeh = false, poruka = "Kartu je ve? na ban listi!" });
+        }
+
+        // Dodaj kartu
+        int rezultat = repo.DodajNaBanListu(sudijaID, nazivKarte);
+
+        if (rezultat > 0)
+        {
+            return Json(new { uspeh = true, poruka = "Kartu dodata na ban listu!" });
+        }
+
+        return Json(new { uspeh = false, poruka = "Gre?ka pri dodavanju!" });
+    }
+    catch (Exception ex)
+    {
+        return Json(new { uspeh = false, poruka = ex.Message });
+    }
+}
+
+Kontroler kreira repozitorijum sa konekcijskim stringom. Poziva metode kao ?to su
+DaLiJeKartaNaBanListi() za proveru i DodajNaBanListu() za pisanje. Vra?a JSON rezultat.
+
+???????????????????????????????????????????????????????????????????????????????????
+
+ZAKLJU?AK:
+
+Stored procedure pristup koristi parametrizovane SQL upite u data access klasi (SPBanListaDBKlasa).
+Svaki SQL upit koristi @parametri umesto string-a direktno. Using iskazi osiguravaju
+da se konekcije zatvore. Repozitorijum delegira sve pozive na data access klasu.
+Parametrizovani upiti spre?avaju SQL injection.
+
+???????????????????????????????????????????????????????????????????????????????????

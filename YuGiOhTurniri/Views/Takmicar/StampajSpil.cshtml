@@ -1,0 +1,351 @@
+@model YuGiOhTurniri.Models.StampajSpilVM
+
+@{
+    Layout = null;
+    ViewBag.Title = "?tampa Spila - " + Model.Spil.Naziv;
+}
+
+<!DOCTYPE html>
+<html lang="sr-Latn">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewBag.Title</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .print-container {
+            width: 210mm;
+            height: 297mm;
+            margin: 0 auto;
+            padding: 15mm;
+            background: white;
+            page-break-after: always;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid black;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .player-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #333;
+            background: #f9f9f9;
+        }
+
+        .info-box {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-weight: bold;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .info-value {
+            border-bottom: 1px solid #333;
+            padding: 3px;
+            min-height: 18px;
+        }
+
+        .deck-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .deck-column {
+            border: 2px solid #333;
+            padding: 0;
+        }
+
+        .deck-header {
+            background: #2c3e50;
+            color: white;
+            padding: 5px;
+            font-weight: bold;
+            text-align: center;
+            border-bottom: 1px solid #333;
+        }
+
+        .deck-rows {
+            display: flex;
+            flex-direction: column;
+            height: 300px;
+            overflow: hidden;
+        }
+
+        .card-row {
+            display: flex;
+            padding: 2px 3px;
+            border-bottom: 1px solid #ccc;
+            min-height: 15px;
+            font-size: 9px;
+        }
+
+        .card-name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .card-qty {
+            width: 25px;
+            text-align: center;
+            border-left: 1px solid #ccc;
+            padding-left: 3px;
+        }
+
+        .deck-total {
+            background: #ecf0f1;
+            font-weight: bold;
+            padding: 5px;
+            text-align: center;
+            border-top: 2px solid #333;
+        }
+
+        .side-extra-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .judge-section {
+            border: 2px solid #333;
+            padding: 10px;
+            background: #fff9e6;
+        }
+
+        .judge-title {
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+
+        .judge-field {
+            margin-bottom: 8px;
+            display: flex;
+            gap: 5px;
+            font-size: 10px;
+        }
+
+        .judge-label {
+            font-weight: bold;
+            width: 80px;
+        }
+
+        .judge-line {
+            flex: 1;
+            border-bottom: 1px solid #333;
+        }
+
+        .footer {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 2px solid #333;
+            text-align: center;
+            font-size: 10px;
+        }
+
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            .print-container {
+                margin: 0;
+                padding: 0;
+                page-break-after: always;
+            }
+        }
+    </style>
+</head>
+<body onload="window.print()">
+    <div class="print-container">
+        <div class="header">
+            <div class="header-title">Yu-Gi-Oh! Spil Obrazac</div>
+        </div>
+
+        <div class="player-info">
+            <div class="info-box">
+                <div class="info-label">Ime i Prezime:</div>
+                <div class="info-value">@Model.Takmi?ar</div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-label">Datum Rodjenja:</div>
+                <div class="info-value"></div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-label">Naziv Spila:</div>
+                <div class="info-value">@Model.Spil.Naziv</div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-label">Format:</div>
+                <div class="info-value">@Model.Spil.Format</div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-label">Arhetip:</div>
+                <div class="info-value">@Model.Spil.Arhetip</div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-label">Email:</div>
+                <div class="info-value"></div>
+            </div>
+        </div>
+
+        <div class="deck-section">
+            <div class="deck-column">
+                <div class="deck-header">Monster Cards</div>
+                <div class="deck-rows">
+                    @{
+                        var mainCards = Model.Karte.Where(k => k.Sekcija == "Main").ToList();
+                    }
+                    @foreach (var karta in mainCards)
+                    {
+                        <div class="card-row">
+                            <div class="card-name">@karta.NazivKarte</div>
+                            <div class="card-qty">@karta.Kolicina</div>
+                        </div>
+                    }
+                </div>
+                <div class="deck-total">
+                    Total: @mainCards.Sum(k => k.Kolicina)
+                </div>
+            </div>
+
+            <div class="deck-column">
+                <div class="deck-header">Spell Cards</div>
+                <div class="deck-rows">
+                    @foreach (var karta in mainCards)
+                    {
+                        <div class="card-row">
+                            <div class="card-name">@karta.NazivKarte</div>
+                            <div class="card-qty">@karta.Kolicina</div>
+                        </div>
+                    }
+                </div>
+                <div class="deck-total">
+                    Total: @mainCards.Sum(k => k.Kolicina)
+                </div>
+            </div>
+
+            <div class="deck-column">
+                <div class="deck-header">Trap Cards</div>
+                <div class="deck-rows">
+                    @foreach (var karta in mainCards)
+                    {
+                        <div class="card-row">
+                            <div class="card-name">@karta.NazivKarte</div>
+                            <div class="card-qty">@karta.Kolicina</div>
+                        </div>
+                    }
+                </div>
+                <div class="deck-total">
+                    Total: @mainCards.Sum(k => k.Kolicina)
+                </div>
+            </div>
+        </div>
+
+        <div class="side-extra-section">
+            <div class="deck-column">
+                <div class="deck-header">Side Deck</div>
+                <div class="deck-rows">
+                    @{
+                        var sideCards = Model.Karte.Where(k => k.Sekcija == "Side").ToList();
+                    }
+                    @foreach (var karta in sideCards)
+                    {
+                        <div class="card-row">
+                            <div class="card-name">@karta.NazivKarte</div>
+                            <div class="card-qty">@karta.Kolicina</div>
+                        </div>
+                    }
+                </div>
+                <div class="deck-total">
+                    Total: @sideCards.Sum(k => k.Kolicina)
+                </div>
+            </div>
+
+            <div class="deck-column">
+                <div class="deck-header">Extra Deck</div>
+                <div class="deck-rows">
+                    @{
+                        var extraCards = Model.Karte.Where(k => k.Sekcija == "Extra").ToList();
+                    }
+                    @foreach (var karta in extraCards)
+                    {
+                        <div class="card-row">
+                            <div class="card-name">@karta.NazivKarte</div>
+                            <div class="card-qty">@karta.Kolicina</div>
+                        </div>
+                    }
+                </div>
+                <div class="deck-total">
+                    Total: @extraCards.Sum(k => k.Kolicina)
+                </div>
+            </div>
+        </div>
+
+        <div class="judge-section">
+            <div class="judge-title">Za Sudiju - Provera Spila</div>
+
+            <div class="judge-field">
+                <div class="judge-label">Spil Prihvacen:</div>
+                <div class="judge-line">DA / NE</div>
+            </div>
+
+            <div class="judge-field">
+                <div class="judge-label">Napomena:</div>
+                <div class="judge-line"></div>
+            </div>
+
+            <div class="judge-field">
+                <div class="judge-label">Sudija Inicijali:</div>
+                <div class="judge-line" style="width: 100px;"></div>
+                <div style="margin-left: 20px;">Datum: <span style="border-bottom: 1px solid #333; width: 80px; display: inline-block;"></span></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Yu-Gi-Oh! Turniri - Seminarski Rad</p>
+            <p>Kreirano: @DateTime.Now.ToString("dd.MM.yyyy HH:mm")</p>
+        </div>
+    </div>
+</body>
+</html>

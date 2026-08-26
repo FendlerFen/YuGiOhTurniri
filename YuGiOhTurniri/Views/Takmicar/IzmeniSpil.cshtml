@@ -1,0 +1,339 @@
+@model YuGiOhTurniri.Models.DetaljiSpilVM
+
+@{
+    ViewBag.Title = "Izmeni Spil";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var mainKarte = Model?.Karte != null ? Model.Karte.Where(k => k.Sekcija == "Main").ToList() : new List<YuGiOhTurniri.Models.KartaUSpiluVM>();
+    var extraKarte = Model?.Karte != null ? Model.Karte.Where(k => k.Sekcija == "Extra").ToList() : new List<YuGiOhTurniri.Models.KartaUSpiluVM>();
+    var sideKarte = Model?.Karte != null ? Model.Karte.Where(k => k.Sekcija == "Side").ToList() : new List<YuGiOhTurniri.Models.KartaUSpiluVM>();
+}
+
+<style>
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .form-section {
+        background: white;
+        border-radius: 8px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: bold;
+        margin-bottom: 1.5rem;
+        color: #333;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 0.5rem;
+    }
+
+    .info-form {
+        display: grid;
+        grid-template-columns: repeat(1, 1fr);
+        gap: 1rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-group label {
+        font-weight: bold;
+        color: #333;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 0.75rem;
+        border: 1px solid #cbd5e0;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+
+    .deck-section-header {
+        font-size: 1.1rem;
+        font-weight: bold;
+        padding: 0.75rem 1rem;
+        background: #667eea;
+        color: white;
+        border-radius: 4px;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .card-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 2rem;
+    }
+
+    .card-table thead {
+        background: #667eea;
+        color: white;
+    }
+
+    .card-table th {
+        padding: 0.75rem;
+        text-align: left;
+        font-weight: bold;
+    }
+
+    .card-table td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .card-table input {
+        padding: 0.5rem;
+        border: 1px solid #cbd5e0;
+        border-radius: 4px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .card-table select {
+        padding: 0.5rem;
+        border: 1px solid #cbd5e0;
+        border-radius: 4px;
+        width: 100%;
+        box-sizing: border-box;
+        font-size: 1rem;
+    }
+
+    .btn-container {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-primary {
+        background: #667eea;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #5568d3;
+    }
+
+    .btn-secondary {
+        background: #cbd5e0;
+        color: #333;
+    }
+
+    .btn-secondary:hover {
+        background: #a0aec0;
+    }
+</style>
+
+<div class="container">
+    <div class="page-header">
+        <h1 class="page-title">Izmeni Spil - @Model.Naziv</h1>
+        <p class="page-subtitle">Promeni metadata (status ce biti resetovan na 'Na cekanju')</p>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            <strong>Greske u formi:</strong>
+            @foreach (var error in ViewData.ModelState.Values)
+            {
+                foreach (var err in error.Errors)
+                {
+                    <p>@err.ErrorMessage</p>
+                }
+            }
+        </div>
+    }
+
+    @using (Html.BeginForm("IzmeniSpil", "Takmicar", FormMethod.Post))
+    {
+        <!-- OSNOVNE INFORMACIJE -->
+        <div class="form-section">
+            <h2 class="section-title">Osnovne Informacije</h2>
+
+            @Html.Hidden("SpilID", Model.SpilID)
+
+            <div class="info-form">
+                <div class="form-group">
+                    <label>Naziv Spila</label>
+                    @Html.TextBoxFor(x => x.Naziv, new { @class = "form-control", placeholder = "npr: Sinkro Vladar", value = Model.Naziv ?? "" })
+                </div>
+                <div class="form-group">
+                    <label>Format</label>
+                    @Html.DropDownListFor(x => x.Format, new SelectList(Model.Formati, Model.Format), "-- Odaberi --", new { @class = "form-control" })
+                </div>
+                <div class="form-group">
+                    <label>Arhetip</label>
+                    @Html.TextBoxFor(x => x.Arhetip, new { @class = "form-control", placeholder = "npr: Sinkro, Fuzija...", value = Model.Arhetip ?? "" })
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN DECK -->
+        <div class="form-section">
+            <div class="deck-section-header">Main Deck (@mainKarte.Count karata)</div>
+            @if (mainKarte.Count > 0)
+            {
+                // Sortiraj karte: Monster ¨ Spell ¨ Trap
+                var sortiraneMainKarte = mainKarte.OrderBy(k =>
+                    k.TipKarte == "Monster" ? 1 :
+                    k.TipKarte == "Spell" ? 2 :
+                    k.TipKarte == "Trap" ? 3 : 4
+                ).ToList();
+
+                <table class="card-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 40%">Naziv Karte</th>
+                            <th style="width: 25%">Tip</th>
+                            <th style="width: 20%">Kolicina</th>
+                            <th style="width: 15%">ID</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var karta in sortiraneMainKarte)
+                        {
+                            <tr>
+                                <td>
+                                    <input type="text" name="naziv_@karta.KartaUSpiluID" value="@karta.NazivKarte" placeholder="Ime karte">
+                                </td>
+                                <td>
+                                    <select name="tip_@karta.KartaUSpiluID">
+                                        <option value="" @(string.IsNullOrEmpty(karta.TipKarte) ? "selected" : "")>-- Odaberi --</option>
+                                        <option value="Monster" @(karta.TipKarte == "Monster" ? "selected" : "")>Monster</option>
+                                        <option value="Spell" @(karta.TipKarte == "Spell" ? "selected" : "")>Spell</option>
+                                        <option value="Trap" @(karta.TipKarte == "Trap" ? "selected" : "")>Trap</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="number" name="kolicina_@karta.KartaUSpiluID" value="@karta.Kolicina" min="1" max="3">
+                                </td>
+                                <td>
+                                    <input type="hidden" name="kartaid_@karta.KartaUSpiluID" value="@karta.KartaUSpiluID">
+                                    <small>@karta.KartaUSpiluID</small>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p style="text-align: center; color: #999;">Nema karata</p>
+            }
+        </div>
+
+        <!-- EXTRA DECK -->
+        <div class="form-section">
+            <div class="deck-section-header">Extra Deck (@extraKarte.Count karata)</div>
+            @if (extraKarte.Count > 0)
+            {
+                // Sortiraj karte: Monster ¨ Spell ¨ Trap
+                var sortiraneExtraKarte = extraKarte.OrderBy(k =>
+                    k.TipKarte == "Monster" ? 1 :
+                    k.TipKarte == "Spell" ? 2 :
+                    k.TipKarte == "Trap" ? 3 : 4
+                ).ToList();
+
+                <table class="card-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50%">Naziv Karte</th>
+                            <th style="width: 30%">Kolicina</th>
+                            <th style="width: 20%">ID</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var karta in sortiraneExtraKarte)
+                        {
+                            <tr>
+                                <td>
+                                    <input type="text" name="naziv_@karta.KartaUSpiluID" value="@karta.NazivKarte" placeholder="Ime karte">
+                                </td>
+                                <td>
+                                    <input type="number" name="kolicina_@karta.KartaUSpiluID" value="@karta.Kolicina" min="1" max="3">
+                                </td>
+                                <td>
+                                    <input type="hidden" name="kartaid_@karta.KartaUSpiluID" value="@karta.KartaUSpiluID">
+                                    <small>@karta.KartaUSpiluID</small>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p style="text-align: center; color: #999;">Nema karata</p>
+            }
+        </div>
+
+        <!-- SIDE DECK -->
+        <div class="form-section">
+            <div class="deck-section-header">Side Deck (@sideKarte.Count karata)</div>
+            @if (sideKarte.Count > 0)
+            {
+                // Sortiraj karte: Monster ¨ Spell ¨ Trap
+                var sortiraniSideKarte = sideKarte.OrderBy(k =>
+                    k.TipKarte == "Monster" ? 1 :
+                    k.TipKarte == "Spell" ? 2 :
+                    k.TipKarte == "Trap" ? 3 : 4
+                ).ToList();
+
+                <table class="card-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50%">Naziv Karte</th>
+                            <th style="width: 30%">Kolicina</th>
+                            <th style="width: 20%">ID</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var karta in sortiraniSideKarte)
+                        {
+                            <tr>
+                                <td>
+                                    <input type="text" name="naziv_@karta.KartaUSpiluID" value="@karta.NazivKarte" placeholder="Ime karte">
+                                </td>
+                                <td>
+                                    <input type="number" name="kolicina_@karta.KartaUSpiluID" value="@karta.Kolicina" min="1" max="3">
+                                </td>
+                                <td>
+                                    <input type="hidden" name="kartaid_@karta.KartaUSpiluID" value="@karta.KartaUSpiluID">
+                                    <small>@karta.KartaUSpiluID</small>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p style="text-align: center; color: #999;">Nema karata</p>
+            }
+        </div>
+
+        <!-- AKCIJE -->
+        <div class="btn-container">
+            <button type="submit" class="btn btn-primary">Sacuvaj Izmene</button>
+            <a href="@Url.Action("DetaljiSpila", "Takmicar", new { id = Model.SpilID })" class="btn btn-secondary">Otkazite</a>
+        </div>
+    }
+</div>

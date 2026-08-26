@@ -1,0 +1,70 @@
+@model List<YuGiOhTurniri.Models.BannedKartaKlasa>
+
+@{
+    ViewBag.Title = "Zabranjene Karte";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-header">
+    <h1 class="page-title">Zabranjene Karte</h1>
+    <p class="page-subtitle">Yu-Gi-Oh! Ban List</p>
+</div>
+
+<div class="mb-3">
+    <a href="@Url.Action("DodajBannedKartu", "Sudija")" class="btn btn-success">Dodaj Zabranjenu Kartu</a>
+</div>
+
+@if (Model == null || Model.Count == 0)
+{
+    <div class="alert alert-info">
+        Nema zabranjenih karata na Ban Listi.
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Naziv Karte</th>
+                        <th>Status</th>
+                        <th>Datim Dodavanja</th>
+                        <th>Akcije</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var karta in Model)
+                    {
+                        <tr>
+                            <td>@karta.Naziv</td>
+                            <td>
+                                @if (karta.Status == "Zabranjena")
+                                {
+                                    <span class="badge badge-danger">Zabranjena</span>
+                                }
+                                else if (karta.Status == "Limitirana")
+                                {
+                                    <span class="badge badge-warning">Limitirana (1)</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-primary">Semi-Limited (2)</span>
+                                }
+                            </td>
+                            <td>@karta.DatumDodavanja.ToString("dd.MM.yyyy")</td>
+                            <td>
+                                <a href="@Url.Action("ObrisiZabranjenKartu", "Sudija", new { id = karta.BannedKartaID })" 
+                                   class="btn btn-danger" 
+                                   style="padding: 0.4rem 0.8rem; font-size: 0.875rem;"
+                                   onclick="return confirm('Sigurno ?elite ukloniti?')">
+                                    Ukloni
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

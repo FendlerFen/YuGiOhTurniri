@@ -1,0 +1,351 @@
+6.4. Sloj poslovne logike - Realizacija poslovnog pravila
+
+Sloj poslovne logike (Business Logic Layer) implementira poslovne regule koje nisu vezane 
+za bazu podataka ili prezentaciju. Klju?ne regule su: validacija spila (broj karata po 
+sekciji, zabranjene karte, format), kreiranje turnira sa proverama, i upravljanje ograni?enjima 
+(JSON config file). Poslovne klase su nezavisne od kontrolera i View-a.
+
+???????????????????????????????????????????????????????????????????????????????????
+
+1. VALIDACIJA SPILA - ValidacijaSpillaKlasa.cs
+
+FILE: PoslovnaLogika/ValidacijaSpillaKlasa.cs
+
+using System;
+using System.Collections.Generic;
+using System.Data;
+using KlasePodataka;
+using Repozitorijumi;
+using Servisi;
+
+namespace PoslovnaLogika
+{
+    public class ValidacijaSpillaKlasa
+    {
+        private readonly string _konekcija;
+
+        public ValidacijaSpillaKlasa(string konekcija)
+        {
+            _konekcija = konekcija;
+        }
+
+        // Validacija cijelog spila
+        public bool ValidanSpil(SpilKlasa spil, List<KartaUSpiluKlasa> karte)
+        {
+            if (string.IsNullOrWhiteSpace(spil.Naziv))
+                return false;
+
+            if (string.IsNullOrWhiteSpace(spil.Format))
+                return false;
+
+            if (!ValidanBrojKarata(karte))
+                return false;
+
+            if (!ValidanFormat(spil.Format))
+                return false;
+
+            return true;
+        }
+
+        // Validacija pojedine karte
+        public bool ValidnaKarta(string nazivKarte, string sekcija, byte kolicina)
+        {
+            if (JeKartaZabranjena(nazivKarte))
+                return false;
+
+            if (sekcija != "Main" && sekcija != "Extra" && sekcija != "Side")
+                return false;
+
+            if (kolicina < 1 || kolicina > 3)
+                return false;
+
+            return true;
+        }
+
+        // Brojanje karata po sekcijama
+        private bool ValidanBrojKarata(List<KartaUSpiluKlasa> karte)
+        {
+            var ogranicenja = new OgranicenjaServis();
+
+            int mainCount = 0;
+            int extraCount = 0;
+            int sideCount = 0;
+
+            foreach (var karta in karte)
+            {
+                if (karta.Sekcija == "Main")
+                    mainCount += karta.Kolicina;
+                else if (karta.Sekcija == "Extra")
+                    extraCount += karta.Kolicina;
+                else if (karta.Sekcija == "Side")
+                    sideCount += karta.Kolicina;
+            }
+
+            // Provjeri Main
+            if (mainCount < ogranicenja.DajMinBrojKarataMain() ||
+                mainCount > ogranicenja.DajMaxBrojKarataMain())
+                return false;
+
+            // Provjeri Extra
+            if (extraCount > ogranicenja.DajMaxBrojKarataExtra())
+                return false;
+
+            // Provjeri Side
+            if (sideCount > ogranicenja.DajMaxBrojKarataSide())
+                return false;
+
+            return true;
+        }
+
+        // Validacija formata
+        public bool ValidanFormat(string format)
+        {
+            return format == "TCG" || format == "OCG" || format == "Speed Duel";
+        }
+
+        // Provjeri da li je karta zabranjena
+        private bool JeKartaZabranjena(string nazivKarte)
+        {
+            using (System.Data.SqlClient.SqlConnection conn =
+                new System.Data.SqlClient.SqlConnection(_konekcija))
+            {
+                System.Data.SqlClient.SqlCommand cmd =
+                    new System.Data.SqlClient.SqlCommand(
+                        "SELECT COUNT(*) FROM BannedKarta WHERE NazivKarte = @Naziv AND Aktivan = 1",
+                        conn);
+                cmd.Parameters.AddWithValue("@Naziv", nazivKarte);
+
+                conn.Open();
+                int broj = (int)cmd.ExecuteScalar();
+
+                return broj > 0;
+            }
+        }
+    }
+}
+
+Klasa ValidacijaSpillaKlasa sadr?i sve poslovne regule za deck. ValidanSpil() proverava 
+naziv, format i broj karata. ValidnaKarta() proverava pojedinu kartu (zabranjena, sekcija, 
+koli?ina 1-3). ValidanBrojKarata() ra?una karte po sekciji i poredi sa ograni?enjima iz 
+JSON fajla. JeKartaZabranjena() direktno meri bazu podataka za Ban List.
+
+„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ
+
+2. OGRANI?ENJA IZ JSON KONFIGURACIJE - OgranicenjaServis.cs
+
+FILE: Servisi/OgranicenjaServis.cs
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using Newtonsoft.Json;
+
+namespace Servisi
+{
+    public class OgranicenjaServis
+    {
+        private dynamic Ucitaj()
+        {
+            string putanja = Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                "ogranicenja.json"
+            );
+
+            string json = File.ReadAllText(putanja);
+            return JsonConvert.DeserializeObject(json);
+        }
+
+        public int DajMaxBrojTakmicara()
+        {
+            var obj = Ucitaj();
+            return (int)obj.maxBrojTakmicara;
+        }
+
+        public int DajMinBrojKarataMain()
+        {
+            var obj = Ucitaj();
+            return (int)obj.minBrojKarataMain;
+        }
+
+        public int DajMaxBrojKarataMain()
+        {
+            var obj = Ucitaj();
+            return (int)obj.maxBrojKarataMain;
+        }
+
+        public int DajMaxBrojKarataExtra()
+        {
+            var obj = Ucitaj();
+            return (int)obj.maxBrojKarataExtra;
+        }
+
+        public int DajMaxBrojKarataSide()
+        {
+            var obj = Ucitaj();
+            return (int)obj.maxBrojKarataSide;
+        }
+
+        public int DajMaxBrojIsteKarte()
+        {
+            var obj = Ucitaj();
+            return (int)obj.maxBrojIsteKarte;
+        }
+    }
+}
+
+OgranicenjaServis u?itava JSON konfiguraciju (ogranicenja.json) i vra?a vrednosti 
+za limitiranje karata. Primeri: Main Deck min 40 - max 60 karata, Extra max 15, 
+Side max 15, ista karta max 3 kopije.
+
+JSON primer (ogranicenja.json):
+{
+  "minBrojKarataMain": 40,
+  "maxBrojKarataMain": 60,
+  "maxBrojKarataExtra": 15,
+  "maxBrojKarataSide": 15,
+  "maxBrojIsteKarte": 3,
+  "maxBrojTakmicara": 256
+}
+
+„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ
+
+3. KREIRANJE TURNIRA - KreiranjeTurniraKlasa.cs
+
+FILE: PoslovnaLogika/KreiranjeTurniraKlasa.cs
+
+using System;
+using System.Collections.Generic;
+using KlasePodataka;
+using Repozitorijumi;
+using Servisi;
+
+namespace PoslovnaLogika
+{
+    public class KreiranjeTurniraKlasa
+    {
+        private readonly ITurnirRepozitorijum _turnirRepo;
+        private readonly string _konekcija;
+
+        public KreiranjeTurniraKlasa(string konekcija, ITurnirRepozitorijum turnirRepo)
+        {
+            _konekcija = konekcija;
+            _turnirRepo = turnirRepo;
+        }
+
+        public int KreirajTurnir(TurnirKlasa turnir)
+        {
+            if (!ValidanTurnir(turnir))
+                return 0;
+
+            return _turnirRepo.Dodaj(turnir);
+        }
+
+        private bool ValidanTurnir(TurnirKlasa turnir)
+        {
+            if (string.IsNullOrWhiteSpace(turnir.Naziv))
+                return false;
+
+            if (string.IsNullOrWhiteSpace(turnir.Lokacija))
+                return false;
+
+            if (turnir.DatumOdrzavanja <= DateTime.Now)
+                return false;
+
+            var ogranicenja = new OgranicenjaServis();
+
+            if (string.IsNullOrWhiteSpace(turnir.Format))
+                return false;
+
+            return true;
+        }
+
+        public TurnirKlasa DajTurnirZaStampu(int turnirID)
+        {
+            var turnir = _turnirRepo.DajPoID(turnirID);
+
+            if (turnir == null)
+                return null;
+
+            return turnir;
+        }
+    }
+}
+
+KreiranjeTurniraKlasa upravlja poslovnom logikom turnira. KreirajTurnir() prvo validira 
+turnir (naziv, lokacija, datum u budu?nosti, format) pa tek onda ga dodaje u bazu. 
+DajTurnirZaStampu() vra?a turnir za printanje bez filtriranja baza podataka.
+
+„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ
+
+4. PRIMENA U KONTROLERU
+
+FILE: YuGiOhTurniri/Controllers/TakmicarController.cs (deo)
+
+[HttpPost]
+public ActionResult KreirajSpil(KreirajSpilVM model)
+{
+    if (!ModelState.IsValid)
+    {
+        model.Formati = new List<string> { "TCG", "OCG", "Speed Duel" };
+        return View(model);
+    }
+
+    int takmicarID = Convert.ToInt32(Session["takmicarID"]);
+
+    SpilKlasa spil = new SpilKlasa
+    {
+        Naziv = model.Naziv,
+        Format = model.Format,
+        Arhetip = model.Arhetip,
+        TakmicarID = takmicarID
+    };
+
+    // Pripremi listu karata za validaciju
+    List<KartaUSpiluKlasa> karte = new List<KartaUSpiluKlasa>();
+
+    if (model.MainDeck != null)
+    {
+        foreach (var k in model.MainDeck)
+        {
+            if (!string.IsNullOrEmpty(k.NazivKarte) && int.TryParse(k.Kolicina, out int kol))
+            {
+                karte.Add(new KartaUSpiluKlasa
+                {
+                    NazivKarte = k.NazivKarte,
+                    Sekcija = "Main",
+                    Kolicina = (byte)kol,
+                    TipKarte = k.Tip
+                });
+            }
+        }
+    }
+
+    // Validacija - poziva poslovnu logiku
+    ValidacijaSpillaKlasa validacija = new ValidacijaSpillaKlasa(_konekcija);
+    if (!validacija.ValidanSpil(spil, karte))
+    {
+        ModelState.AddModelError("", "Spil ne zadovoljava poslovne regule!");
+        model.Formati = new List<string> { "TCG", "OCG", "Speed Duel" };
+        return View(model);
+    }
+
+    // Dodaj spil u bazu
+    ISpilRepozitorijum repo = new SpilRepozitorijumSP(_konekcija);
+    int spilID = repo.Dodaj(spil);
+
+    if (spilID <= 0)
+    {
+        ModelState.AddModelError("", "Gre?ka pri kreiranju spila!");
+        model.Formati = new List<string> { "TCG", "OCG", "Speed Duel" };
+        return View(model);
+    }
+
+    TempData["Poruka"] = "Spil uspe?no kreiran!";
+    return RedirectToAction("MojiSpilovi");
+}
+
+Kontroler prvo validira ModelState (client validacije), zatim pravi entity objekat iz 
+View Modela, poziva ValidacijaSpillaKlasa za poslovne regule, i tek onda koristi 
+repository za upis u bazu. Ovako se razdvajaju nivoi validacije.
+
+???????????????????????????????????????????????????????????????????????????????????

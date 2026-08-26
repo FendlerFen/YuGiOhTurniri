@@ -1,0 +1,42 @@
+﻿@{
+    ViewBag.Title = "Pocetna";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="max-width: 1000px; margin: 0 auto;">
+    <div class="page-header">
+        <h1 class="page-title">Takmicarski Panel</h1>
+        <p class="page-subtitle">Dobrodosli! Kreirajte spilove i takmicite se sa drugima</p>
+    </div>
+
+    <div class="dashboard-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; margin-top: 2rem;">
+        <!-- Upravljanje Spilovima -->
+        <div class="dashboard-card" style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+            <h3>Upravljanje Spilovima</h3>
+            <p>Kreirajte nove spilove, azurirajte postojece ili pregledajte sve svoje spilove. Spilovi moraju biti odobreni od strane sudije.</p>
+            <a href="@Url.Action("MojiSpilovi", "Takmicar")" class="btn btn-primary" style="display: inline-block; margin-top: 1rem;">Moji Spilovi</a>
+        </div>
+
+        <!-- Dostupni Turniri -->
+        <div class="dashboard-card" style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+            <h3>Dostupni Turniri</h3>
+            <p>Pregledajte sve dostupne turnire koji su trenutno otvoreni za prijave i pridruzite se sa vasim spilom.</p>
+            <a href="@Url.Action("OtvoreniTurniri", "Takmicar")" class="btn btn-success" style="display: inline-block; margin-top: 1rem;">Dostupni Turniri</a>
+        </div>
+
+        <!-- Završeni Turniri i Pobjednici -->
+        <div class="dashboard-card" style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+            <h3>Zavrseni Turniri</h3>
+            <p>Pregledajte sve zavrsene turnire i vidite koji su bili pobjednici svakog turnira.</p>
+            <a href="@Url.Action("ZavrsenTurniri", "Takmicar")" class="btn btn-warning" style="display: inline-block; margin-top: 1rem;">Zavrseni Turniri</a>
+        </div>
+
+        <!-- Ban Lista -->
+        <div class="dashboard-card" style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+            <h3>Ban Lista</h3>
+            <p>Pregledajte sve zabranjene karte koje ne smijete koristiti u vasim spilovima.</p>
+            <a href="@Url.Action("BanLista", "Takmicar")" class="btn btn-danger" style="display: inline-block; margin-top: 1rem;">Pogledaj Ban Listu</a>
+        </div>
+    </div>
+</div>
+

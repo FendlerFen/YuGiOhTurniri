@@ -1,0 +1,368 @@
+6.3. Prezentacioni sloj - Realizacija MVC i View modela
+
+MVC arhitektura implementira razdvajanje briga - Model (ViewModel) defini?e podatke sa validacijom, Controller upravlja logikom i komunikacijom, View koristi Razor sintaksu za prikaz. View Models (VM) slu?e kao intermedijari izme?u kontrolera i prikaza, sadr?e samo podatke potrebne za konkretnu stranicu.
+
+„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ
+
+KOD - VIEW MODEL ZA PRIJAVU (PrijavaVM.cs):
+
+public class PrijavaVM
+{
+    [Required(ErrorMessage = "Email je obavezan")]
+    [EmailAddress(ErrorMessage = "Email nije validan")]
+    public string Email { get; set; }
+
+    [Required(ErrorMessage = "Lozinka je obavezna")]
+    [StringLength(256, MinimumLength = 6)]
+    public string Lozinka { get; set; }
+}
+
+ViewModel za prijavu sadr?i email i lozinku sa DataAnnotations validacijom. [EmailAddress] atribut osigurava da je format email-a validan. Koristi se samo za logovanje korisnika.
+
+„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ
+
+KOD - VIEW MODEL ZA KREIRANJE SPILA (KreirajSpilVM.cs):
+
+public class KreirajSpilVM
+{
+    public int SpilID { get; set; }
+
+    [Required(ErrorMessage = "Naziv spila je obavezan")]
+    [StringLength(100, ErrorMessage = "Naziv mo?e imati maksimalno 100 karaktera")]
+    public string Naziv { get; set; }
+
+    [Required(ErrorMessage = "Format je obavezan")]
+    public string Format { get; set; }
+
+    [StringLength(100, ErrorMessage = "Arhetip mo?e imati maksimalno 100 karaktera")]
+    public string Arhetip { get; set; }
+
+    public List<string> Formati { get; set; }
+
+    // Karte odvojene po sekcijama
+    public List<MainDeckKarta> MainDeck { get; set; }
+    public List<ExtraDeckKarta> ExtraDeck { get; set; }
+    public List<SideDeckKarta> SideDeck { get; set; }
+
+    public KreirajSpilVM()
+    {
+        MainDeck = new List<MainDeckKarta>();
+        ExtraDeck = new List<ExtraDeckKarta>();
+        SideDeck = new List<SideDeckKarta>();
+    }
+}
+
+public class MainDeckKarta
+{
+    public string NazivKarte { get; set; }
+    public string Tip { get; set; }  // Monster, Spell, Trap
+    public string Kolicina { get; set; }
+}
+
+public class ExtraDeckKarta
+{
+    public string NazivKarte { get; set; }
+    public string Kolicina { get; set; }
+}
+
+public class SideDeckKarta
+{
+    public string NazivKarte { get; set; }
+    public string Kolicina { get; set; }
+}
+
+ViewModel za kreiranje spila sadr?i naziv, format, arhetip i karte grupirane po sekcijama (Main, Extra, Side). Svaka sekcija je odvojena klasa sa svojom strukturom. Formati lista se koristi za dropdown meni.
+
+„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ
+
+KOD - VIEW MODEL ZA DETALJE SPILA (DetaljiSpilVM):
+
+public class DetaljiSpilVM
+{
+    public int SpilID { get; set; }
+    public string Naziv { get; set; }
+    public string Format { get; set; }
+    public string Arhetip { get; set; }
+    public string Status { get; set; }
+    public DateTime DatumKreiranja { get; set; }
+    public string NapomenaSudije { get; set; }
+    public List<KartaUSpiluVM> Karte { get; set; }
+    public List<string> Formati { get; set; }
+}
+
+public class KartaUSpiluVM
+{
+    public int KartaUSpiluID { get; set; }
+    public string NazivKarte { get; set; }
+    public string Sekcija { get; set; }
+    public int Kolicina { get; set; }
+    public string TipKarte { get; set; }
+}
+
+ViewModel za prikaz detalja spila sadr?i sve informacije o spilu i listu karata sa ID-om (za update/delete operacije).
+
+„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ
+
+KOD - KONTROLER - AKCIJE (TakmicarController.cs):
+
+public class TakmicarController : Controller
+{
+    private readonly string _konekcija = ConfigurationManager.ConnectionStrings["Konekcija"].ConnectionString;
+
+    // Za?tita - samo prijavljeni korisnici
+    protected override void OnActionExecuting(ActionExecutingContext filterContext)
+    {
+        if (Session["takmicarID"] == null)
+        {
+            filterContext.Result = RedirectToAction("PrijaviTakmicara", "Account");
+        }
+        base.OnActionExecuting(filterContext);
+    }
+
+    // GET - Prikazi formu za kreiranje spila
+    public ActionResult KreirajSpil()
+    {
+        KreirajSpilVM vm = new KreirajSpilVM();
+        vm.Formati = new List<string> { "TCG", "OCG", "Speed Duel" };
+        return View(vm);
+    }
+
+    // POST - Procesira unete podatke
+    [HttpPost]
+    public ActionResult KreirajSpil(KreirajSpilVM model)
+    {
+        // Validacija
+        if (!ModelState.IsValid)
+        {
+            ModelState.AddModelError("", "Gre?ke pri validaciji");
+            model.Formati = new List<string> { "TCG", "OCG", "Speed Duel" };
+            return View(model);
+        }
+
+        // Logika kreiranja...
+        int takmicarID = Convert.ToInt32(Session["takmicarID"]);
+
+        SpilKlasa spil = new SpilKlasa
+        {
+            Naziv = model.Naziv,
+            Format = model.Format,
+            Arhetip = model.Arhetip,
+            TakmicarID = takmicarID
+        };
+
+        ISpilRepozitorijum repo = new SpilRepozitorijumSP(_konekcija);
+        int spilID = repo.Dodaj(spil);
+
+        if (spilID <= 0)
+        {
+            ModelState.AddModelError("", "Gre?ka pri kreiranju spila!");
+            return View(model);
+        }
+
+        TempData["Poruka"] = "Spil uspe?no kreiran!";
+        return RedirectToAction("MojiSpilovi");
+    }
+
+    // GET - Prikazi sve spilove takmi?ara sa filterima
+    public ActionResult MojiSpilovi(string format = "", string pretraga = "", string status = "")
+    {
+        int takmicarID = Convert.ToInt32(Session["takmicarID"]);
+
+        ISpilRepozitorijum repo = new SpilRepozitorijumSP(_konekcija);
+        List<SpilKlasa> spilovi = repo.DajSpiloveTakmicara(takmicarID);
+
+        // Primeni filtre
+        FiltriranjeServis filtriranjeServis = new FiltriranjeServis();
+        spilovi = filtriranjeServis.Filtriraj(spilovi, format, pretraga);
+
+        if (!string.IsNullOrEmpty(status))
+            spilovi = spilovi.Where(s => s.Status == status).ToList();
+
+        // Mapira na ViewModel
+        List<SpilPrikazVM> vm = new List<SpilPrikazVM>();
+        foreach (var spil in spilovi)
+        {
+            vm.Add(new SpilPrikazVM
+            {
+                SpilID = spil.SpilID,
+                Naziv = spil.Naziv,
+                Format = spil.Format,
+                Arhetip = spil.Arhetip,
+                Status = spil.Status,
+                DatumKreiranja = spil.DatumKreiranja
+            });
+        }
+
+        ViewBag.Formati = filtriranjeServis.DajDostupneFormate();
+        ViewBag.IzabranFormat = format;
+        ViewBag.Pretraga = pretraga;
+
+        return View(vm);
+    }
+
+    // GET - Prikazi detalje jednog spila
+    public ActionResult DetaljiSpila(int id)
+    {
+        ISpilRepozitorijum repo = new SpilRepozitorijumSP(_konekcija);
+        SpilKlasa spil = repo.DajPoID(id);
+
+        if (spil == null)
+            return HttpNotFound();
+
+        List<KartaUSpiluKlasa> karte = repo.DajKarteSpila(id);
+
+        DetaljiSpilVM vm = new DetaljiSpilVM
+        {
+            SpilID = spil.SpilID,
+            Naziv = spil.Naziv,
+            Format = spil.Format,
+            Arhetip = spil.Arhetip,
+            Status = spil.Status,
+            DatumKreiranja = spil.DatumKreiranja,
+            Karte = new List<KartaUSpiluVM>()
+        };
+
+        foreach (var karta in karte)
+        {
+            vm.Karte.Add(new KartaUSpiluVM
+            {
+                KartaUSpiluID = karta.KartaUSpiluID,
+                NazivKarte = karta.NazivKarte,
+                Sekcija = karta.Sekcija,
+                Kolicina = karta.Kolicina,
+                TipKarte = karta.TipKarte ?? ""
+            });
+        }
+
+        return View(vm);
+    }
+
+    // GET - Prikazi ban listu
+    public ActionResult BanLista()
+    {
+        IBanListaRepository repo = new BanListaRepozitorijumSP(_konekcija);
+        List<BanListaKlasa> banLista = repo.DajSvuBanListu();
+
+        List<BanListaPrikazVM> vm = new List<BanListaPrikazVM>();
+        foreach (var stavka in banLista)
+        {
+            vm.Add(new BanListaPrikazVM
+            {
+                BanListaID = stavka.BanListaID,
+                NazivKarte = stavka.NazivKarte,
+                DatumDodavanja = stavka.DatumDodavanja
+            });
+        }
+
+        return View(vm);
+    }
+}
+
+Kontroler upravlja tokm aplikacije - prima zahteve, obra?uje ih, komunicira sa repository slojem, mapira podatke u ViewModele i vra?a View. Svaka akcija vra?a odgovaraju?i ViewModel za konkretnu stranicu.
+
+„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ
+
+KOD - VIEW MODEL ZA PRIKAZ BAN LISTE (BanListaPrikazVM.cs):
+
+public class BanListaPrikazVM
+{
+    public int BanListaID { get; set; }
+    public string NazivKarte { get; set; }
+    public DateTime DatumDodavanja { get; set; }
+}
+
+Jednostavna klasa za prikaz zabranjenih karata u tabelarnom formatu.
+
+„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ
+
+KOD - ZAJEDNI?KE KLASE ZA PRIKAZ (ZajednickeKlase.cs):
+
+public class SpilPrikazVM
+{
+    public int SpilID { get; set; }
+    public string Naziv { get; set; }
+    public string Format { get; set; }
+    public string Arhetip { get; set; }
+    public string Status { get; set; }
+    public DateTime DatumKreiranja { get; set; }
+    public string NapomenaSudije { get; set; }
+}
+
+public class KartaPrikazVM
+{
+    public int KartaUSpiluID { get; set; }
+    public string NazivKarte { get; set; }
+    public string Sekcija { get; set; }
+    public byte Kolicina { get; set; }
+    public string TipKarte { get; set; }
+}
+
+Zajedni?ke klase se koriste u vi?e ViewModela za jednostavno mapiranje podataka.
+
+„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ
+
+PRIMER RAZOR VIEW (Detalji Spila):
+
+@model DetaljiSpilVM
+
+<div class="container">
+    <h2>@Model.Naziv</h2>
+
+    <table class="table">
+        <tr>
+            <td><strong>Format:</strong></td>
+            <td>@Model.Format</td>
+        </tr>
+        <tr>
+            <td><strong>Arhetip:</strong></td>
+            <td>@Model.Arhetip</td>
+        </tr>
+        <tr>
+            <td><strong>Status:</strong></td>
+            <td>@Model.Status</td>
+        </tr>
+    </table>
+
+    <h3>Karte</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Naziv</th>
+                <th>Sekcija</th>
+                <th>Koli?ina</th>
+                <th>Tip</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var karta in Model.Karte)
+            {
+                <tr>
+                    <td>@karta.NazivKarte</td>
+                    <td>@karta.Sekcija</td>
+                    <td>@karta.Kolicina</td>
+                    <td>@karta.TipKarte</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+Razor view koristi Model direktno za prikaz podataka. @Model.Svojstvo pristupa podacima iz ViewModela. @foreach petlja iterira kroz listu karata.
+
+„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ
+
+SA?ETAK MVC ARHITEKTURE:
+
+? Model (ViewModel) - Defini?e podatke sa validacijom
+? Controller - Upravlja logikom, u?itava podatke, mapira u ViewModel
+? View (Razor) - Prikazuje ViewModel podatke korisniku
+
+TOK:
+1. GET zahtev ¨ Controller akcija ¨ U?itaj podatke iz DB
+2. Mapiranje ¨ SpilKlasa ¨ DetaljiSpilVM
+3. return View(vm) ¨ Razor view prikazuje podatke
+4. POST zahtev ¨ Controller validira ModelState
+5. Ako je validno ¨ Procesira i RedirectToAction
+6. Ako nije ¨ return View(model) sa gre?kama
+
+„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ

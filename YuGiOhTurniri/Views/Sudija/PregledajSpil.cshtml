@@ -1,0 +1,135 @@
+﻿@model YuGiOhTurniri.Models.StampajSpilVM
+
+@{
+    ViewBag.Title = "Pregled Spila";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-header">
+    <h1 class="page-title">Pregled Spila - @Model.Spil.Naziv</h1>
+    <p class="page-subtitle">Sudijska revizija spila takmičara</p>
+</div>
+
+<div class="row">
+    <div style="flex: 1;">
+        <div class="card">
+            <div class="card-header">
+                <strong>Informacije o Spilu</strong>
+            </div>
+            <div class="card-body">
+                <p><strong>Naziv:</strong> @Model.Spil.Naziv</p>
+                <p><strong>Format:</strong> @Model.Spil.Format</p>
+                <p><strong>Arhetip:</strong> @Model.Spil.Arhetip</p>
+                <p><strong>Takmičar:</strong> @Model.TakmicarIme</p>
+                <p><strong>Kreirano:</strong> @Model.Spil.DatumKreiranja.ToString("dd.MM.yyyy")</p>
+            </div>
+        </div>
+    </div>
+
+    <div style="flex: 1;">
+        <div class="card">
+            <div class="card-header">
+                <strong>Brojanje Karata</strong>
+            </div>
+            <div class="card-body">
+                <div style="padding: 1rem; background: #e3f2fd; border-radius: 5px; margin-bottom: 1rem;">
+                    <p><strong>Main Deck:</strong> <span style="font-size: 1.5rem; color: #1976d2;">@(Model.Karte.Where(k => k.Sekcija == "Main").Sum(k => k.Kolicina))</span> / 60</p>
+                </div>
+                <div style="padding: 1rem; background: #f3e5f5; border-radius: 5px; margin-bottom: 1rem;">
+                    <p><strong>Extra Deck:</strong> <span style="font-size: 1.5rem; color: #7b1fa2;">@(Model.Karte.Where(k => k.Sekcija == "Extra").Sum(k => k.Kolicina))</span> / 15</p>
+                </div>
+                <div style="padding: 1rem; background: #e8f5e9; border-radius: 5px;">
+                    <p><strong>Side Deck:</strong> <span style="font-size: 1.5rem; color: #388e3c;">@(Model.Karte.Where(k => k.Sekcija == "Side").Sum(k => k.Kolicina))</span> / 15</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">
+        <strong>Karte u Spilu</strong>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Naziv Karte</th>
+                    <th>Sekcija</th>
+                    <th>Tip</th>
+                    <th>Kolicina</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    // Sortiraj karte: Monster → Spell → Trap
+                    var sortiraneKarte = Model.Karte.OrderBy(k => 
+                        k.TipKarte == "Monster" ? 1 :
+                        k.TipKarte == "Spell" ? 2 :
+                        k.TipKarte == "Trap" ? 3 : 4
+                    ).ToList();
+                }
+                @foreach (var karta in sortiraneKarte)
+                {
+                    <tr>
+                        <td>@karta.NazivKarte</td>
+                        <td>
+                            @if (karta.Sekcija == "Main")
+                            {
+                                <span class="badge badge-primary">Main Deck</span>
+                            }
+                            else if (karta.Sekcija == "Extra")
+                            {
+                                <span class="badge badge-danger">Extra Deck</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-warning">Side Deck</span>
+                            }
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(karta.TipKarte))
+                            {
+                                <span>@karta.TipKarte</span>
+                            }
+                            else
+                            {
+                                <span style="color: #999;">-</span>
+                            }
+                        </td>
+                        <td>@karta.Kolicina</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+    <div class="card-header">
+        <strong>Sudijska Odluka</strong>
+    </div>
+    <div class="card-body">
+        @using (Html.BeginForm("OdlukaOSpilu", "Sudija", FormMethod.Post))
+        {
+            @Html.Hidden("SpilID", Model.Spil.SpilID)
+
+            <div class="form-group">
+                <label>Status Spila</label>
+                <select name="Status" class="form-control" required>
+                    <option value="">-- Odaberite odluku --</option>
+                    <option value="Odobren">ODOBRI SPIL</option>
+                    <option value="Odbijen">ODBIJ SPIL</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Napomena (opciono)</label>
+                <textarea name="Napomena" class="form-control" placeholder="Ako je spil odbijen, objasnite razlog..." rows="4"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-success btn-block">Potvrdi Odluku</button>
+            <a href="@Url.Action("SpiloveNaCekanju", "Sudija")" class="btn btn-secondary btn-block" style="margin-top: 0.5rem;">Nazad</a>
+        }
+    </div>
+</div>

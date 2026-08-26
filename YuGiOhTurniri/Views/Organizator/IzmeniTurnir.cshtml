@@ -1,0 +1,155 @@
+@model YuGiOhTurniri.Models.KreirajTurnirVM
+
+@{
+    ViewBag.Title = "Izmeni Turnir";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-header">
+    <h1 class="page-title">Izmeni Turnir</h1>
+    <p class="page-subtitle">Izmenite parametre vaseg turnira</p>
+</div>
+
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <div class="card-body">
+        @using (Html.BeginForm("IzmeniTurnir", "Organizator", new { id = ViewBag.TurnirID }, FormMethod.Post, new { @class = "form-validation" }))
+        {
+            @Html.ValidationSummary(true, "", new { @class = "form-error" })
+
+            <div class="form-group">
+                <label>Naziv Turnira</label>
+                @Html.TextBoxFor(x => x.Naziv, new { @class = "form-control", placeholder = "npr: YuGiOh Svetski Kup", required = "required" })
+                @Html.ValidationMessageFor(x => x.Naziv, "", new { @class = "form-error" })
+            </div>
+
+            <div class="form-group">
+                <label>Lokacija</label>
+                @Html.TextBoxFor(x => x.Lokacija, new { @class = "form-control", placeholder = "npr: Beograd, Stadion Partizana", required = "required" })
+                @Html.ValidationMessageFor(x => x.Lokacija, "", new { @class = "form-error" })
+            </div>
+
+            <div class="form-group">
+                <label>Format</label>
+                @Html.DropDownListFor(x => x.Format, Model.Formati, "-- Odaberite format --", new { @class = "form-control", required = "required" })
+                @Html.ValidationMessageFor(x => x.Format, "", new { @class = "form-error" })
+            </div>
+
+            <div class="form-group">
+                <label>Datum Odrzavanja</label>
+                <input type="date" name="DatumOdrzavanja" id="DatumOdrzavanja" class="form-control" value="@Model.DatumOdrzavanja.ToString("yyyy-MM-dd")" required="required" />
+                @Html.ValidationMessageFor(x => x.DatumOdrzavanja, "", new { @class = "form-error" })
+            </div>
+
+            <button type="submit" class="btn btn-success btn-block">Sa?uva Izmene</button>
+            <a href="@Url.Action("DetaljiTurnira", "Organizator", new { id = ViewBag.TurnirID })" class="btn btn-secondary btn-block" style="margin-top: 0.5rem;">Otka?i</a>
+        }
+    </div>
+</div>
+
+<style>
+    input[type="date"] {
+        padding: 0.375rem 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+    }
+    input[type="date"]:focus {
+        border-color: #80bdff;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+</style>
+
+        }
+    </div>
+</div>
+
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border-radius: 8px;
+    }
+
+    .page-title {
+        margin: 0;
+        font-size: 2rem;
+    }
+
+    .page-subtitle {
+        margin: 0.5rem 0 0 0;
+        opacity: 0.9;
+    }
+
+    .card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control {
+        padding: 0.75rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 1rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        text-decoration: none;
+        display: block;
+        width: 100%;
+        text-align: center;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .btn-success:hover {
+        background-color: #218838;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+
+    .form-error {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+</style>

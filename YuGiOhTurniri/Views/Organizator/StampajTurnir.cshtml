@@ -1,0 +1,27 @@
+@model YuGiOhTurniri.Models.StampajTurnirVM
+
+@{
+    ViewBag.Title = "?tampaj Turnir";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <h2>?tampaj Turnir - @Model.Naziv</h2>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">@Model.Naziv</h5>
+            <p><strong>Lokacija:</strong> @Model.Lokacija</p>
+            <p><strong>Format:</strong> @Model.Format</p>
+            <p><strong>Datum odrzavanja:</strong> @Model.DatumOdrzavanja?.ToString("dd.MM.yyyy")</p>
+            <p><strong>Status:</strong> <span class="badge badge-info">@Model.Status</span></p>
+            <p><strong>Organizator:</strong> @Model.Organizator</p>
+            <p><strong>Broj u?esnika:</strong> @Model.BrojUcesnika</p>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <button onclick="window.print()" class="btn btn-primary">?tampaj</button>
+        <a href="@Url.Action("MojiTurniri")" class="btn btn-secondary">Nazad</a>
+    </div>
+</div>

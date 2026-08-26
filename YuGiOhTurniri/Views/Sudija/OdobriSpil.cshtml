@@ -1,0 +1,38 @@
+@model YuGiOhTurniri.Models.OdluciNaSpilVM
+
+@{
+    ViewBag.Title = Model.NoviStatus == "Odobren" ? "Odobri Spil" : "Odbij Spil";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2>@ViewBag.Title</h2>
+
+            @using (Html.BeginForm(Model.NoviStatus == "Odobren" ? "OdobriSpil" : "OdbijiSpil", "Sudija", FormMethod.Post, new { @class = "form-horizontal" }))
+            {
+                @Html.AntiForgeryToken()
+
+                @Html.HiddenFor(m => m.SpilID)
+                @Html.HiddenFor(m => m.NoviStatus)
+
+                <div class="form-group">
+                    <label for="napomena" class="control-label col-md-3">Napomena</label>
+                    <div class="col-md-9">
+                        @Html.TextAreaFor(m => m.Napomena, new { @class = "form-control", rows = 5, placeholder = "Napomena (opciono)" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-offset-3 col-md-9">
+                        <button type="submit" class="btn btn-@(Model.NoviStatus == "Odobren" ? "success" : "danger")">
+                            @(Model.NoviStatus == "Odobren" ? "Odobri" : "Odbij")
+                        </button>
+                        <a href="@Url.Action("SpiloveNaCekanju")" class="btn btn-secondary">Otka?i</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

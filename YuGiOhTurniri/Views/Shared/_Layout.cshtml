@@ -1,0 +1,81 @@
+﻿<!DOCTYPE html>
+<html lang="sr-Latn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Yu-Gi-Oh! Turniri</title>
+    <link href="~/Content/style.css" rel="stylesheet" type="text/css" />
+    <script src="~/Scripts/jquery-3.7.0.js"></script>
+    <script src="~/Scripts/validacija.js"></script>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="container">
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <span class="navbar-brand">Yu-Gi-Oh! Turniri</span>
+
+                <div style="display: flex; gap: 2rem;">
+                    @if (Session["takmicarID"] == null && Session["organizatorID"] == null && Session["sudijaID"] == null)
+                    {
+                        <a href="@Url.Action("Index", "Home")" class="nav-link">Pocetna</a>
+                    }
+
+                    @if (Session["takmicarID"] != null)
+                    {
+                        <a href="@Url.Action("Index", "Takmicar")" class="nav-link">Pocetna</a>
+                        <a href="@Url.Action("MojiSpilovi", "Takmicar")" class="nav-link">Moji Spilovi</a>
+                        <a href="@Url.Action("OtvoreniTurniri", "Takmicar")" class="nav-link">Prijave</a>
+                        <a href="@Url.Action("BanLista", "Takmicar")" class="nav-link">Ban Lista</a>
+                        <a href="@Url.Action("Logout", "Account")" class="nav-link">Odjava</a>
+                        <span class="navbar-user">@Session["ime"] @Session["prezime"]</span>
+                    }
+                    else if (Session["organizatorID"] != null)
+                    {
+                        <a href="@Url.Action("Kontrolna", "Organizator")" class="nav-link">Pocetna</a>
+                        <a href="@Url.Action("MojiTurniri", "Organizator")" class="nav-link">Moji Turniri</a>
+                        <a href="@Url.Action("KreirajTurnir", "Organizator")" class="nav-link">Novi Turnir</a>
+                        <a href="@Url.Action("Logout", "Organizator")" class="nav-link">Odjava</a>
+                        <span class="navbar-user">@Session["organizatorIme"] @Session["organizatorPrezime"]</span>
+                    }
+                    else if (Session["sudijaID"] != null)
+                    {
+                        <a href="@Url.Action("Dashboard", "Sudija")" class="nav-link">Pocetna</a>
+                        <a href="@Url.Action("SpiloveNaCekanju", "Sudija")" class="nav-link">Pregled Spilova</a>
+                        <a href="@Url.Action("BanLista", "Sudija")" class="nav-link">Ban Lista</a>
+                        <a href="@Url.Action("OdjavaS", "Sudija")" class="nav-link">Odjava</a>
+                        <span class="navbar-user">@Session["sudijaIme"]</span>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("PrijaviTakmicara", "Account")" class="nav-link">Takmicara</a>
+                        <a href="@Url.Action("PrijaviOrganizatora", "Organizator")" class="nav-link">Organizator</a>
+                        <a href="@Url.Action("PrijavaS", "Sudija")" class="nav-link">Sudija</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="container">
+        @if (TempData["Poruka"] != null)
+        {
+            <div class="alert alert-success">@TempData["Poruka"]</div>
+        }
+
+        @if (TempData["Greska"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Greska"]</div>
+        }
+
+        @RenderBody()
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>&copy; @DateTime.Now.Year Yu-Gi-Oh! Turniri - Seminarski Rad</p>
+        <p>Razvoj Višeslojnog Softvera</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,212 @@
+@model YuGiOhTurniri.Models.RegistracijaSudijeVM
+
+@{
+    ViewBag.Title = "Registracija Sudije";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="auth-container">
+    <div class="auth-card">
+        <h1 class="auth-title">Registracija Sudije</h1>
+
+        @if (TempData["Greska"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Greska"]</div>
+        }
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">
+                <strong>Gre?ke u formi:</strong>
+                @foreach (var error in ViewData.ModelState.Values)
+                {
+                    foreach (var err in error.Errors)
+                    {
+                        <p>@err.ErrorMessage</p>
+                    }
+                }
+            </div>
+        }
+
+        @using (Html.BeginForm("RegistrujSudiju", "Account", FormMethod.Post, new { @class = "form-validation" }))
+        {
+            <div class="form-group">
+                <label>Ime</label>
+                @Html.TextBoxFor(m => m.Ime, new { @class = "form-control", placeholder = "Unesite ime", required = "required" })
+                @Html.ValidationMessageFor(m => m.Ime, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group">
+                <label>Prezime</label>
+                @Html.TextBoxFor(m => m.Prezime, new { @class = "form-control", placeholder = "Unesite prezime", required = "required" })
+                @Html.ValidationMessageFor(m => m.Prezime, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group">
+                <label>Email</label>
+                @Html.TextBoxFor(m => m.Email, new { @type = "email", @class = "form-control", placeholder = "Unesite email", required = "required" })
+                @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group">
+                <label>Lozinka</label>
+                @Html.PasswordFor(m => m.Lozinka, new { @class = "form-control", placeholder = "Unesite lozinku", required = "required" })
+                @Html.ValidationMessageFor(m => m.Lozinka, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group">
+                <label>Potvrda Lozinke</label>
+                @Html.PasswordFor(m => m.PotvrdaLozinke, new { @class = "form-control", placeholder = "Ponovite lozinku", required = "required" })
+                @Html.ValidationMessageFor(m => m.PotvrdaLozinke, "", new { @class = "text-danger" })
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Registruj se kao Sudija</button>
+        }
+
+        <div class="auth-link">
+            Vec imate nalog? <a href="@Url.Action("PrijavaS", "Sudija")">Prijavite se</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .auth-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .auth-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .auth-title {
+        text-align: center;
+        color: #333;
+        margin-bottom: 1.5rem;
+        font-size: 1.8rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #333;
+        font-weight: 500;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .btn-block {
+        width: 100%;
+        padding: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .alert {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        border-radius: 4px;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .text-danger {
+        color: #721c24;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .auth-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: #666;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #333;
+        font-weight: 500;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .btn-block {
+        width: 100%;
+        padding: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .alert {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        border-radius: 4px;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .text-danger {
+        color: #721c24;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .auth-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: #666;
+    }
+
+    .auth-link a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .auth-link a:hover {
+        text-decoration: underline;
+    }
+</style>

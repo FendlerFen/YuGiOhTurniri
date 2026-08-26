@@ -1,0 +1,723 @@
+@model YuGiOhTurniri.Models.KreirajSpilVM
+
+@{
+    ViewBag.Title = "Kreiraj Novi Spil";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .deck-creator-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .form-section {
+        background: white;
+        border-radius: 8px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: bold;
+        margin-bottom: 1.5rem;
+        color: #333;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 0.5rem;
+    }
+
+    .deck-section {
+        margin-bottom: 2rem;
+    }
+
+    .deck-section-header {
+        font-size: 1.1rem;
+        font-weight: bold;
+        padding: 0.75rem 1rem;
+        background: #667eea;
+        color: white;
+        border-radius: 4px 4px 0 0;
+        margin-top: 1rem;
+    }
+
+    .card-input-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 0;
+    }
+
+    .card-input-table thead {
+        background: #667eea;
+        color: white;
+    }
+
+    .card-input-table th {
+        padding: 0.75rem;
+        text-align: left;
+        font-weight: bold;
+        border-right: 1px solid #5568d3;
+    }
+
+    .card-input-table th:last-child {
+        border-right: none;
+    }
+
+    .card-input-table td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #e2e8f0;
+        border-right: 1px solid #e2e8f0;
+    }
+
+    .card-input-table td:last-child {
+        border-right: none;
+    }
+
+    .card-input-table input,
+    .card-input-table select {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #cbd5e0;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        box-sizing: border-box;
+    }
+
+    .main-deck-table .card-input-table thead {
+        background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+    }
+
+    .extra-deck-table .card-input-table thead {
+        background: linear-gradient(135deg, #7b1fa2 0%, #6a1b9a 100%);
+    }
+
+    .side-deck-table .card-input-table thead {
+        background: linear-gradient(135deg, #388e3c 0%, #2e7d32 100%);
+    }
+
+    .main-deck-table .deck-section-header {
+        background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+    }
+
+    .extra-deck-table .deck-section-header {
+        background: linear-gradient(135deg, #7b1fa2 0%, #6a1b9a 100%);
+    }
+
+    .side-deck-table .deck-section-header {
+        background: linear-gradient(135deg, #388e3c 0%, #2e7d32 100%);
+    }
+
+    .add-row-btn {
+        background: #48bb78;
+        color: white;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        margin-top: 0.5rem;
+    }
+
+    .add-row-btn:hover {
+        background: #38a169;
+    }
+
+    .remove-row-btn {
+        background: #f56565;
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.85rem;
+    }
+
+    .remove-row-btn:hover {
+        background: #c53030;
+    }
+
+    .deck-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .stat-box {
+        background: #f7fafc;
+        border-left: 4px solid #667eea;
+        padding: 1.5rem;
+        border-radius: 4px;
+    }
+
+    .stat-box.main-stat {
+        border-left-color: #1976d2;
+    }
+
+    .stat-box.extra-stat {
+        border-left-color: #7b1fa2;
+    }
+
+    .stat-box.side-stat {
+        border-left-color: #388e3c;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+
+    .stat-box.main-stat .stat-value {
+        color: #1976d2;
+    }
+
+    .stat-box.extra-stat .stat-value {
+        color: #7b1fa2;
+    }
+
+    .stat-box.side-stat .stat-value {
+        color: #388e3c;
+    }
+
+    .stat-info {
+        font-size: 0.8rem;
+        color: #999;
+        margin-top: 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #cbd5e0;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        justify-content: center;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+
+    .btn-success {
+        background: #48bb78;
+        color: white;
+    }
+
+    .btn-success:hover {
+        background: #38a169;
+    }
+
+    .btn-secondary {
+        background: #cbd5e0;
+        color: #333;
+    }
+
+    .btn-secondary:hover {
+        background: #a0aec0;
+    }
+
+    .form-error {
+        color: #c53030;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+    }
+
+    .alert-danger {
+        background: #fed7d7;
+        color: #c53030;
+        border-left: 4px solid #c53030;
+    }
+
+    .alert-success {
+        background: #c6f6d5;
+        color: #22543d;
+        border-left: 4px solid #22543d;
+    }
+</style>
+
+<div class="deck-creator-container">
+    <div class="page-header">
+        <h1 class="page-title">Kreiraj Novi Spil</h1>
+        <p class="page-subtitle">Unesi osnovne informacije i dodaj karte</p>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            <strong>Greske pri unos:</strong>
+            <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                @foreach (var modelState in ViewData.ModelState.Values)
+                {
+                    foreach (var error in modelState.Errors)
+                    {
+                        <li>@error.ErrorMessage</li>
+                    }
+                }
+            </ul>
+        </div>
+    }
+
+    @using (Html.BeginForm("KreirajSpil", "Takmicar", FormMethod.Post, new { id = "deckForm" }))
+    {
+        <!-- SEKCIJA 1: OSNOVNE INFORMACIJE -->
+        <div class="form-section">
+            <div class="section-title">1. Osnovne Informacije</div>
+
+            <div class="form-group">
+                <label>Naziv Spila *</label>
+                @Html.TextBoxFor(x => x.Naziv, new { @class = "form-control", placeholder = "", required = "required", value = Model.Naziv ?? "" })
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label>Format *</label>
+                    @Html.DropDownListFor(x => x.Format, new SelectList(Model.Formati, Model.Format), "-- Odaberite format --", new { @class = "form-control", required = "required" })
+                </div>
+
+                <div class="form-group">
+                    <label>Arhetip</label>
+                    @Html.TextBoxFor(x => x.Arhetip, new { @class = "form-control", placeholder = "", value = Model.Arhetip ?? "" })
+                </div>
+            </div>
+        </div>
+
+        <!-- SEKCIJA 2: UNOS KARATA -->
+        <div class="form-section">
+            <div class="section-title">2. Unos Karata</div>
+
+            <!-- MAIN DECK -->
+            <div class="deck-section main-deck-table">
+                <div class="deck-section-header">Main Deck (Monster | Spell | Trap)</div>
+                <table class="card-input-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 35%;">Ime Karte</th>
+                            <th style="width: 20%;">Tip</th>
+                            <th style="width: 15%;">Kolicina</th>
+                            <th style="width: 15%;">Akcija</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mainDeckBody">
+                        @if (Model.MainDeck != null && Model.MainDeck.Count > 0)
+                        {
+                            for (int i = 0; i < Model.MainDeck.Count; i++)
+                            {
+                                <tr class="card-row" data-deck="Main" data-index="@i">
+                                    <td>
+                                        <input type="text" name="MainDeck[@i].NazivKarte" class="form-control" placeholder="Ime karte" value="@(Model.MainDeck[i].NazivKarte ?? "")" />
+                                    </td>
+                                    <td>
+                                        <select name="MainDeck[@i].Tip" class="form-control" onchange="updateCardCounts();">
+                                            <option value="">-- Odaberi --</option>
+                                            <option value="Monster" @(Model.MainDeck[i].Tip == "Monster" ? "selected" : "")>Monster</option>
+                                            <option value="Spell" @(Model.MainDeck[i].Tip == "Spell" ? "selected" : "")>Spell</option>
+                                            <option value="Trap" @(Model.MainDeck[i].Tip == "Trap" ? "selected" : "")>Trap</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="text" name="MainDeck[@i].Kolicina" class="form-control kolicina-input" maxlength="1" placeholder="1-3" value="@(Model.MainDeck[i].Kolicina ?? "")" onchange="updateCardCounts();" onkeypress="return /[1-3]/.test(String.fromCharCode(event.which))" />
+                                    </td>
+                                    <td>
+                                        <button type="button" class="remove-row-btn" onclick="removeRow(this);">Ukloni</button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr class="card-row" data-deck="Main" data-index="0">
+                                <td>
+                                    <input type="text" name="MainDeck[0].NazivKarte" class="form-control" placeholder="Ime karte" />
+                                </td>
+                                <td>
+                                    <select name="MainDeck[0].Tip" class="form-control" onchange="updateCardCounts();">
+                                        <option value="">-- Odaberi --</option>
+                                        <option value="Monster">Monster</option>
+                                        <option value="Spell">Spell</option>
+                                        <option value="Trap">Trap</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="text" name="MainDeck[0].Kolicina" class="form-control kolicina-input" maxlength="1" placeholder="1-3" onchange="updateCardCounts();" onkeypress="return /[1-3]/.test(String.fromCharCode(event.which))" />
+                                </td>
+                                <td>
+                                    <button type="button" class="remove-row-btn" onclick="removeRow(this);">Ukloni</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <button type="button" class="add-row-btn" onclick="addMainDeckRow(); event.preventDefault(); return false;">+ Dodaj u Main Deck</button>
+            </div>
+
+            <!-- EXTRA DECK -->
+            <div class="deck-section extra-deck-table">
+                <div class="deck-section-header">Extra Deck</div>
+                <table class="card-input-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 40%;">Ime Karte</th>
+                            <th style="width: 20%;">Kolicina</th>
+                            <th style="width: 20%;">Akcija</th>
+                        </tr>
+                    </thead>
+                    <tbody id="extraDeckBody">
+                        @if (Model.ExtraDeck != null && Model.ExtraDeck.Count > 0)
+                        {
+                            for (int i = 0; i < Model.ExtraDeck.Count; i++)
+                            {
+                                <tr class="card-row" data-deck="Extra" data-index="@i">
+                                    <td>
+                                        <input type="text" name="ExtraDeck[@i].NazivKarte" class="form-control" placeholder="Ime karte" value="@(Model.ExtraDeck[i].NazivKarte ?? "")" />
+                                    </td>
+                                    <td>
+                                        <input type="text" name="ExtraDeck[@i].Kolicina" class="form-control kolicina-input" maxlength="1" placeholder="1-3" value="@(Model.ExtraDeck[i].Kolicina ?? "")" onchange="updateCardCounts();" onkeypress="return /[1-3]/.test(String.fromCharCode(event.which))" />
+                                    </td>
+                                    <td>
+                                        <button type="button" class="remove-row-btn" onclick="removeRow(this);">Ukloni</button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr class="card-row" data-deck="Extra" data-index="0">
+                                <td>
+                                    <input type="text" name="ExtraDeck[0].NazivKarte" class="form-control" placeholder="Ime karte" />
+                                </td>
+                                <td>
+                                    <input type="text" name="ExtraDeck[0].Kolicina" class="form-control kolicina-input" maxlength="1" placeholder="1-3" onchange="updateCardCounts();" onkeypress="return /[1-3]/.test(String.fromCharCode(event.which))" />
+                                </td>
+                                <td>
+                                    <button type="button" class="remove-row-btn" onclick="removeRow(this);">Ukloni</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <button type="button" class="add-row-btn" onclick="addExtraDeckRow(); event.preventDefault(); return false;">+ Dodaj u Extra Deck</button>
+            </div>
+
+            <!-- SIDE DECK -->
+            <div class="deck-section side-deck-table">
+                <div class="deck-section-header">Side Deck</div>
+                <table class="card-input-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 40%;">Ime Karte</th>
+                            <th style="width: 20%;">Kolicina</th>
+                            <th style="width: 20%;">Akcija</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sideDeckBody">
+                        @if (Model.SideDeck != null && Model.SideDeck.Count > 0)
+                        {
+                            for (int i = 0; i < Model.SideDeck.Count; i++)
+                            {
+                                <tr class="card-row" data-deck="Side" data-index="@i">
+                                    <td>
+                                        <input type="text" name="SideDeck[@i].NazivKarte" class="form-control" placeholder="Ime karte" value="@(Model.SideDeck[i].NazivKarte ?? "")" />
+                                    </td>
+                                    <td>
+                                        <input type="text" name="SideDeck[@i].Kolicina" class="form-control kolicina-input" maxlength="1" placeholder="1-3" value="@(Model.SideDeck[i].Kolicina ?? "")" onchange="updateCardCounts();" onkeypress="return /[1-3]/.test(String.fromCharCode(event.which))" />
+                                    </td>
+                                    <td>
+                                        <button type="button" class="remove-row-btn" onclick="removeRow(this);">Ukloni</button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr class="card-row" data-deck="Side" data-index="0">
+                                <td>
+                                    <input type="text" name="SideDeck[0].NazivKarte" class="form-control" placeholder="Ime karte" />
+                                </td>
+                                <td>
+                                    <input type="text" name="SideDeck[0].Kolicina" class="form-control kolicina-input" maxlength="1" placeholder="1-3" onchange="updateCardCounts();" onkeypress="return /[1-3]/.test(String.fromCharCode(event.which))" />
+                                </td>
+                                <td>
+                                    <button type="button" class="remove-row-btn" onclick="removeRow(this);">Ukloni</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <button type="button" class="add-row-btn" onclick="addSideDeckRow(); event.preventDefault(); return false;">+ Dodaj u Side Deck</button>
+            </div>
+        </div>
+
+        <!-- SEKCIJA 3: BROJANJE KARATA -->
+        <div class="form-section">
+            <div class="section-title">3. Pregled Broja Karata</div>
+
+            <div class="deck-stats">
+                <div class="stat-box main-stat">
+                    <div class="stat-label">Main Deck</div>
+                    <div class="stat-value" id="mainCount">0</div>
+                    <div class="stat-info">Preporuceno: 40-60 karata</div>
+                </div>
+                <div class="stat-box extra-stat">
+                    <div class="stat-label">Extra Deck</div>
+                    <div class="stat-value" id="extraCount">0</div>
+                    <div class="stat-info">Maksimalno: 15 karata</div>
+                </div>
+                <div class="stat-box side-stat">
+                    <div class="stat-label">Side Deck</div>
+                    <div class="stat-value" id="sideCount">0</div>
+                    <div class="stat-info">Maksimalno: 15 karata</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DUGMADI -->
+        <div class="form-section">
+            <div class="btn-group">
+                <button type="submit" class="btn btn-success">Kreiraj Spil</button>
+                <a href="@Url.Action("MojiSpilovi", "Takmicar")" class="btn btn-secondary">Nazad</a>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    let mainDeckCounter = 1;
+    let extraDeckCounter = 1;
+    let sideDeckCounter = 1;
+
+    function addMainDeckRow() {
+        const tableBody = document.getElementById('mainDeckBody');
+        if (!tableBody) {
+            console.error('mainDeckBody not found!');
+            return;
+        }
+
+        const newRow = document.createElement('tr');
+        newRow.className = 'card-row';
+        newRow.setAttribute('data-deck', 'Main');
+        newRow.setAttribute('data-index', mainDeckCounter);
+
+        newRow.innerHTML = `
+            <td>
+                <input type="text" name="MainDeck[${mainDeckCounter}].NazivKarte" class="form-control" placeholder="Ime karte" />
+            </td>
+            <td>
+                <select name="MainDeck[${mainDeckCounter}].Tip" class="form-control" onchange="updateCardCounts();">
+                    <option value="">-- Odaberi --</option>
+                    <option value="Monster">Monster</option>
+                    <option value="Spell">Spell</option>
+                    <option value="Trap">Trap</option>
+                </select>
+            </td>
+            <td>
+                <input type="text" name="MainDeck[${mainDeckCounter}].Kolicina" class="form-control kolicina-input" maxlength="1" placeholder="1-3" onchange="updateCardCounts();" onkeypress="return /[1-3]/.test(String.fromCharCode(event.which))" />
+            </td>
+            <td>
+                <button type="button" class="remove-row-btn" onclick="removeRow(this);">Ukloni</button>
+            </td>
+        `;
+
+        tableBody.appendChild(newRow);
+        mainDeckCounter++;
+        updateCardCounts();
+    }
+
+    function addExtraDeckRow() {
+        const tableBody = document.getElementById('extraDeckBody');
+        if (!tableBody) {
+            console.error('extraDeckBody not found!');
+            return;
+        }
+
+        const newRow = document.createElement('tr');
+        newRow.className = 'card-row';
+        newRow.setAttribute('data-deck', 'Extra');
+        newRow.setAttribute('data-index', extraDeckCounter);
+
+        newRow.innerHTML = `
+            <td>
+                <input type="text" name="ExtraDeck[${extraDeckCounter}].NazivKarte" class="form-control" placeholder="Ime karte" />
+            </td>
+            <td>
+                <input type="text" name="ExtraDeck[${extraDeckCounter}].Kolicina" class="form-control kolicina-input" maxlength="1" placeholder="1-3" onchange="updateCardCounts();" onkeypress="return /[1-3]/.test(String.fromCharCode(event.which))" />
+            </td>
+            <td>
+                <button type="button" class="remove-row-btn" onclick="removeRow(this);">Ukloni</button>
+            </td>
+        `;
+
+        tableBody.appendChild(newRow);
+        extraDeckCounter++;
+        updateCardCounts();
+    }
+
+    function addSideDeckRow() {
+        const tableBody = document.getElementById('sideDeckBody');
+        if (!tableBody) {
+            console.error('sideDeckBody not found!');
+            return;
+        }
+
+        const newRow = document.createElement('tr');
+        newRow.className = 'card-row';
+        newRow.setAttribute('data-deck', 'Side');
+        newRow.setAttribute('data-index', sideDeckCounter);
+
+        newRow.innerHTML = `
+            <td>
+                <input type="text" name="SideDeck[${sideDeckCounter}].NazivKarte" class="form-control" placeholder="Ime karte" />
+            </td>
+            <td>
+                <input type="text" name="SideDeck[${sideDeckCounter}].Kolicina" class="form-control kolicina-input" maxlength="1" placeholder="1-3" onchange="updateCardCounts();" onkeypress="return /[1-3]/.test(String.fromCharCode(event.which))" />
+            </td>
+            <td>
+                <button type="button" class="remove-row-btn" onclick="removeRow(this);">Ukloni</button>
+            </td>
+        `;
+
+        tableBody.appendChild(newRow);
+        sideDeckCounter++;
+        updateCardCounts();
+    }
+
+    function removeRow(button) {
+        const row = button.closest('tr');
+        if (row) {
+            row.remove();
+            updateCardCounts();
+        }
+    }
+
+    function updateCardCounts() {
+        let mainCount = 0;
+        let extraCount = 0;
+        let sideCount = 0;
+
+        document.querySelectorAll('#mainDeckBody .card-row input.kolicina-input').forEach(input => {
+            const val = parseInt(input.value) || 0;
+            mainCount += val;
+        });
+
+        document.querySelectorAll('#extraDeckBody .card-row input.kolicina-input').forEach(input => {
+            const val = parseInt(input.value) || 0;
+            extraCount += val;
+        });
+
+        document.querySelectorAll('#sideDeckBody .card-row input.kolicina-input').forEach(input => {
+            const val = parseInt(input.value) || 0;
+            sideCount += val;
+        });
+
+        document.querySelector('.main-stat .stat-value').textContent = mainCount;
+        document.querySelector('.extra-stat .stat-value').textContent = extraCount;
+        document.querySelector('.side-stat .stat-value').textContent = sideCount;
+    }
+
+    function renumberIndices() {
+        console.log('=== Renumbering indices before submit ===');
+
+        // Renumber Main Deck - prona?i sve inpute u redosledu
+        let mainIndex = 0;
+        document.querySelectorAll('#mainDeckBody .card-row').forEach((row) => {
+            const inputs = row.querySelectorAll('input, select');
+            if (inputs.length >= 3) {
+                // Redosled je: NazivKarte, Tip (select), Kolicina
+                inputs[0].setAttribute('name', `MainDeck[${mainIndex}].NazivKarte`);
+                if (inputs[1].tagName === 'SELECT') inputs[1].setAttribute('name', `MainDeck[${mainIndex}].Tip`);
+                if (inputs[inputs.length-1].tagName === 'INPUT') inputs[inputs.length-1].setAttribute('name', `MainDeck[${mainIndex}].Kolicina`);
+
+                console.log(`Main[${mainIndex}]: "${inputs[0].value}" | Tip: "${inputs[1].value}" | Kol: "${inputs[inputs.length-1].value}"`);
+                mainIndex++;
+            }
+        });
+
+        // Renumber Extra Deck
+        let extraIndex = 0;
+        document.querySelectorAll('#extraDeckBody .card-row').forEach((row) => {
+            const inputs = row.querySelectorAll('input');
+            if (inputs.length >= 2) {
+                inputs[0].setAttribute('name', `ExtraDeck[${extraIndex}].NazivKarte`);
+                inputs[inputs.length-1].setAttribute('name', `ExtraDeck[${extraIndex}].Kolicina`);
+
+                console.log(`Extra[${extraIndex}]: "${inputs[0].value}" | Kol: "${inputs[inputs.length-1].value}"`);
+                extraIndex++;
+            }
+        });
+
+        // Renumber Side Deck
+        let sideIndex = 0;
+        document.querySelectorAll('#sideDeckBody .card-row').forEach((row) => {
+            const inputs = row.querySelectorAll('input');
+            if (inputs.length >= 2) {
+                inputs[0].setAttribute('name', `SideDeck[${sideIndex}].NazivKarte`);
+                inputs[inputs.length-1].setAttribute('name', `SideDeck[${sideIndex}].Kolicina`);
+
+                console.log(`Side[${sideIndex}]: "${inputs[0].value}" | Kol: "${inputs[inputs.length-1].value}"`);
+                sideIndex++;
+            }
+        });
+
+        console.log('=== Renumbering complete ===');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Izra?unaj po?etne countere na osnovu postoje?ih redova
+        const mainRows = document.querySelectorAll('#mainDeckBody .card-row').length;
+        const extraRows = document.querySelectorAll('#extraDeckBody .card-row').length;
+        const sideRows = document.querySelectorAll('#sideDeckBody .card-row').length;
+
+        mainDeckCounter = mainRows > 0 ? mainRows : 1;
+        extraDeckCounter = extraRows > 0 ? extraRows : 1;
+        sideDeckCounter = sideRows > 0 ? sideRows : 1;
+
+        updateCardCounts();
+
+        // Prije submita, normalizuj sve indekse
+        const form = document.getElementById('deckForm');
+        if (form) {
+            form.onsubmit = function(e) {
+                console.log('Form submit detected');
+                renumberIndices();
+                console.log('Indices renumbered, submitting form');
+                return true;
+            };
+        }
+    });
+</script>
+

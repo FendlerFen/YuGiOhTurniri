@@ -1,0 +1,68 @@
+@model List<KlasePodataka.BanListaKlasa>
+
+@{
+    ViewBag.Title = "Ban Lista";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="max-width: 1000px; margin: 0 auto;">
+    <div class="page-header">
+        <h1 class="page-title">Ban Lista</h1>
+        <p class="page-subtitle">Upravljanje banned kartama</p>
+    </div>
+
+    <!-- DODAJ NOVU KARTU NA BAN LISTU -->
+    <div style="background: white; padding: 2rem; border-radius: 8px; margin-bottom: 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3>Dodaj kartu na ban listu</h3>
+
+        @using (Html.BeginForm("DodajNaBanListu", "Sudija", FormMethod.Post))
+        {
+            <div class="form-group" style="display: flex; gap: 1rem;">
+                <input type="text" name="nazivKarte" placeholder="Unesite naziv karte..." class="form-control" style="flex: 1;" required>
+                <button type="submit" class="btn btn-danger">Dodaj na ban listu</button>
+            </div>
+        }
+    </div>
+
+    <!-- LISTA BANNED KARATA -->
+    @if (Model == null || Model.Count == 0)
+    {
+        <div class="alert alert-info">
+            Nema karata na ban listi.
+        </div>
+    }
+    else
+    {
+        <div style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: #667eea; color: white;">
+                    <tr>
+                        <th style="padding: 1rem; text-align: left;">Naziv Karte</th>
+                        <th style="padding: 1rem; text-align: left;">Dodata</th>
+                        <th style="padding: 1rem; text-align: center;">Akcije</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var karta in Model)
+                    {
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 1rem;">@karta.NazivKarte</td>
+                            <td style="padding: 1rem;">@karta.DatumDodavanja.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td style="padding: 1rem; text-align: center;">
+                                @using (Html.BeginForm("ObrisiSaBanListe", "Sudija", FormMethod.Post, new { style = "display:inline;" }))
+                                {
+                                    @Html.Hidden("banListaID", karta.BanListaID)
+                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Jeste li sigurni da zelite da obrisete ovu kartu sa ban liste?')" style="padding: 0.5rem 1rem;">Ukloni</button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <div style="margin-top: 2rem;">
+        <a href="@Url.Action("Dashboard", "Sudija")" class="btn btn-secondary">Nazad na Dashboard</a>
+    </div>
+</div>

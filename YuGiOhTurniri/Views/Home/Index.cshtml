@@ -1,0 +1,232 @@
+﻿@model List<KlasePodataka.TurnirKlasa>
+@using System.Linq;
+
+@{
+    ViewBag.Title = "Meni - Pocetna Stranica";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 4rem 2rem;
+        text-align: center;
+        border-radius: 8px;
+        margin-bottom: 3rem;
+    }
+
+    .hero-section h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        font-weight: bold;
+    }
+
+    .hero-section p {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        opacity: 0.95;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+    }
+
+    .btn-large {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        min-width: 200px;
+        text-align: center;
+    }
+
+    .btn-takmicar {
+        background: linear-gradient(135deg, #667eea 0%, #5568d3 100%);
+        color: white;
+    }
+
+    .btn-takmicar:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-sudija {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+    }
+
+    .btn-sudija:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 16px rgba(245, 87, 108, 0.4);
+    }
+
+    .btn-organizator {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+    }
+
+    .btn-organizator:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 16px rgba(79, 172, 254, 0.4);
+    }
+
+    .info-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .info-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .info-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .info-card h3 {
+        color: #667eea;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+    }
+
+    .info-card p {
+        color: #666;
+        line-height: 1.6;
+    }
+
+    .turniri-section {
+        margin-top: 3rem;
+    }
+
+    .turniri-title {
+        font-size: 2rem;
+        color: #333;
+        margin-bottom: 2rem;
+        text-align: center;
+        border-bottom: 3px solid #667eea;
+        padding-bottom: 1rem;
+    }
+</style>
+
+<!-- HERO SEKCIJA -->
+<div class="hero-section">
+    <h1>Yu-Gi-Oh! Turniri</h1>
+    <p>Sistem za upravljanje turnirima, spilovima i takmicara</p>
+
+    <div class="button-group">
+        <a href="@Url.Action("PrijaviTakmicara", "Account")" class="btn-large btn-takmicar">
+            Prijava Takmicara
+        </a>
+        <a href="@Url.Action("PrijavaS", "Sudija")" class="btn-large btn-sudija">
+            Prijava Sudije
+        </a>
+        <a href="@Url.Action("PrijaviOrganizatora", "Organizator")" class="btn-large btn-organizator">
+            Prijava Organizatora
+        </a>
+    </div>
+</div>
+
+<!-- INFORMACIJE -->
+<div class="info-section">
+    <div class="info-card">
+        <h3>Za Takmicara</h3>
+        <p>Kreirajte i upravljajte svojim spilovima, registrujte se na turnire i pratite svoje rezultate. Minimalna starost: 15 godina.</p>
+    </div>
+
+    <div class="info-card">
+        <h3>Za Sudiju</h3>
+        <p>Pregledajte spilove takmicara, odobravajte ili odbijajte ih, i upravljajte ban listom zabranjenih karata.</p>
+    </div>
+
+    <div class="info-card">
+        <h3>Za Organizatora</h3>
+        <p>Kreirajte nove turnire, upravljajte ucesnicima, proglasavajte pobednike i pratite sve statistike.</p>
+    </div>
+</div>
+
+<!-- DOSTUPNI TURNIRI -->
+@if (Model != null && Model.Count > 0)
+{
+    <div class="turniri-section">
+        <h2 class="turniri-title">Otvoreni Turniri</h2>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+            @foreach (var turnir in Model.Where(t => t.Status == "Otvoren").ToList())
+            {
+                <div style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform 0.3s ease;">
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem;">
+                        <h3 style="margin: 0; font-size: 1.3rem;">@turnir.Naziv</h3>
+                    </div>
+                    <div style="padding: 1.5rem;">
+                        <p><strong>Lokacija:</strong> @turnir.Lokacija</p>
+                        <p><strong>Format:</strong> @turnir.Format</p>
+                        <p><strong>Datum:</strong> @turnir.DatumOdrzavanja.ToString("dd.MM.yyyy")</p>
+                        <p><strong>Status:</strong> 
+                            <span style="background: #48bb78; color: white; padding: 0.25rem 0.75rem; border-radius: 4px; font-weight: bold;">Otvoren</span>
+                        </p>
+                    </div>
+                    <div style="padding: 1rem; display: flex; gap: 0.5rem;">
+                        <a href="@Url.Action("DetaljiTurnira", "Home", new { id = turnir.TurnirID })" class="btn-large" style="background: #667eea; color: white; padding: 0.75rem 1.5rem; font-size: 1rem; flex: 1; margin: 0;">
+                            Detaljni pregled
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 1.5rem; border-radius: 4px; margin-top: 2rem;">
+        <p style="margin: 0; color: #1976d2; font-size: 1.1rem;">Trenutno nema otvorenih turnira. Organizatori ce uskoro objaviti nove turnire!</p>
+    </div>
+}
+
+<!-- ZAVRŠENI TURNIRI SA POBEDNICIMA -->
+@if (Model != null && Model.Where(t => t.Status == "Zavrsen").ToList().Count > 0)
+{
+    <div class="turniri-section">
+        <h2 class="turniri-title">Zavrseni Turniri - Pobednici</h2>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+            @foreach (var turnir in Model.Where(t => t.Status == "Zavrsen").ToList())
+            {
+                <div style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform 0.3s ease;">
+                    <div style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); color: white; padding: 1.5rem;">
+                        <h3 style="margin: 0; font-size: 1.3rem;">@turnir.Naziv</h3>
+                    </div>
+                    <div style="padding: 1.5rem;">
+                        <p><strong>Lokacija:</strong> @turnir.Lokacija</p>
+                        <p><strong>Format:</strong> @turnir.Format</p>
+                        <p><strong>Datum:</strong> @turnir.DatumOdrzavanja.ToString("dd.MM.yyyy")</p>
+                        <p><strong>Status:</strong> 
+                            <span style="background: #48bb78; color: white; padding: 0.25rem 0.75rem; border-radius: 4px; font-weight: bold;">Zavrseno</span>
+                        </p>
+                    </div>
+                    <div style="padding: 1rem; display: flex; gap: 0.5rem;">
+                        <a href="@Url.Action("DetaljiTurnira", "Home", new { id = turnir.TurnirID })" class="btn-large" style="background: #48bb78; color: white; padding: 0.75rem 1.5rem; font-size: 1rem; flex: 1; margin: 0;">
+                            Vidi Pobednike
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}

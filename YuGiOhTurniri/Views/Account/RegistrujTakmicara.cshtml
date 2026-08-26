@@ -1,0 +1,76 @@
+@model YuGiOhTurniri.Models.RegistracijaTakmicaraVM
+
+@{
+    ViewBag.Title = "Registracija Takmicara";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="auth-container">
+    <div class="auth-card">
+        <h1 class="auth-title">Registracija Takmicara</h1>
+
+        @if (ViewBag.Greska != null)
+        {
+            <div class="alert alert-danger">@ViewBag.Greska</div>
+        }
+
+        @using (Html.BeginForm("RegistrujTakmicara", "Account", FormMethod.Post, new { @class = "form-validation" }))
+        {
+
+            <div class="form-group">
+                <label>Ime</label>
+                @Html.TextBoxFor(x => x.Ime, new { @class = "form-control", placeholder = "Unesite ime" })
+                @Html.ValidationMessageFor(x => x.Ime, "", new { @class = "form-error" })
+            </div>
+
+            <div class="form-group">
+                <label>Prezime</label>
+                @Html.TextBoxFor(x => x.Prezime, new { @class = "form-control", placeholder = "Unesite prezime" })
+                @Html.ValidationMessageFor(x => x.Prezime, "", new { @class = "form-error" })
+            </div>
+
+            <div class="form-group">
+                <label>Elektronska adresa</label>
+                @Html.TextBoxFor(x => x.Email, new { @class = "form-control", placeholder = "Unesite email", type = "email" })
+                @Html.ValidationMessageFor(x => x.Email, "", new { @class = "form-error" })
+            </div>
+
+            <div class="form-group">
+                <label>Datum rodjenja</label>
+                @Html.TextBoxFor(x => x.DatumRodjenja, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                @Html.ValidationMessageFor(x => x.DatumRodjenja, "", new { @class = "form-error" })
+            </div>
+
+            <div class="form-group">
+                <label>Drzava</label>
+                @Html.TextBoxFor(x => x.Drzava, new { @class = "form-control", placeholder = "Unesite drzavu" })
+                @Html.ValidationMessageFor(x => x.Drzava, "", new { @class = "form-error" })
+            </div>
+
+            <div class="form-group">
+                <label>Pol</label>
+                @Html.DropDownListFor(x => x.Pol, new SelectList(new[] { "Muski", "Zenski" }), "-- Odaberite --", new { @class = "form-control" })
+                @Html.ValidationMessageFor(x => x.Pol, "", new { @class = "form-error" })
+            </div>
+
+            <div class="form-group">
+                <label>Lozinka</label>
+                @Html.PasswordFor(x => x.Lozinka, new { @class = "form-control", placeholder = "Unesite lozinku" })
+                @Html.ValidationMessageFor(x => x.Lozinka, "", new { @class = "form-error" })
+            </div>
+
+            <div class="form-group">
+                <label>Potvrdi lozinku</label>
+                @Html.PasswordFor(x => x.PotvrdiLozinku, new { @class = "form-control", placeholder = "Ponovite lozinku" })
+                @Html.ValidationMessageFor(x => x.PotvrdiLozinku, "", new { @class = "form-error" })
+            </div>
+
+            <button type="submit" class="btn btn-success btn-block">Registruj se</button>
+        }
+
+        <div class="auth-link">
+            Vec imate nalog? <a href="@Url.Action("PrijaviTakmicara", "Account")">Prijavite se</a>
+        </div>
+    </div>
+</div>
+

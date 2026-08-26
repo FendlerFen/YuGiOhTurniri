@@ -1,0 +1,50 @@
+@{
+    ViewBag.Title = "Kontrolna Ploca Organizatora";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="max-width: 1000px; margin: 0 auto;">
+    <div class="page-header">
+        <h1 class="page-title">Kontrolna Ploca Organizatora</h1>
+        <p class="page-subtitle">Dobrodosli, @Session["organizatorNaziv"]</p>
+    </div>
+
+    @if (Session["organizatorID"] != null)
+    {
+        <div class="dashboard-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; margin-top: 2rem;">
+            <!-- Kreiraj Turnir -->
+            <div class="dashboard-card" style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+                <h3>Kreiraj Turnir</h3>
+                <p>Kreiraj novi turnir i upravljaj njim</p>
+                <a href="@Url.Action("KreirajTurnir", "Organizator")" class="btn btn-primary" style="display: inline-block; margin-top: 1rem;">Kreiraj</a>
+            </div>
+
+            <!-- Moji Turniri -->
+            <div class="dashboard-card" style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+                <h3>Moji Turniri</h3>
+                <p>Pregledaj i upravljaj svim turnim</p>
+                <a href="@Url.Action("MojiTurniri", "Organizator")" class="btn btn-secondary" style="display: inline-block; margin-top: 1rem;">Pregled</a>
+            </div>
+
+            <!-- Izvestaji -->
+            <div class="dashboard-card" style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+                <h3>Izvestaji</h3>
+                <p>Pregledaj statistiku i rezultate</p>
+                <a href="@Url.Action("Izvestaji", "Organizator")" class="btn btn-info" style="display: inline-block; margin-top: 1rem;">Pregledaj</a>
+            </div>
+
+            <!-- Odjava -->
+            <div class="dashboard-card" style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+                <h3>Odjava</h3>
+                <p>Izloguj se iz sistema</p>
+                <a href="@Url.Action("Logout", "Organizator")" class="btn btn-danger" style="display: inline-block; margin-top: 1rem;">Odjavi se</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-danger">
+            Niste prijavljeni! <a href="@Url.Action("PrijaviOrganizatora", "Organizator")">Prijavite se</a>
+        </div>
+    }
+</div>

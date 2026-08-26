@@ -1,0 +1,40 @@
+@model YuGiOhTurniri.Models.PrijavaVM
+
+@{
+    ViewBag.Title = "Prijava Organizatora";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="auth-container">
+    <div class="auth-card">
+        <h1 class="auth-title">Prijava Organizatora</h1>
+
+        @if (ViewBag.Greska != null)
+        {
+            <div class="alert alert-danger">
+                <strong>Gre?ka:</strong> @ViewBag.Greska
+            </div>
+        }
+
+        @using (Html.BeginForm("PrijaviOrganizatora", "Organizator", FormMethod.Post, new { @class = "form-validation", id = "loginForm" }))
+        {
+            <div class="form-group">
+                <label>Elektronska adresa</label>
+                @Html.TextBoxFor(x => x.Email, new { @class = "form-control", placeholder = "Unesite email", type = "email" })
+                @Html.ValidationMessageFor(x => x.Email, "", new { @class = "form-error" })
+            </div>
+
+            <div class="form-group">
+                <label>Lozinka</label>
+                @Html.PasswordFor(x => x.Lozinka, new { @class = "form-control", placeholder = "Unesite lozinku" })
+                @Html.ValidationMessageFor(x => x.Lozinka, "", new { @class = "form-error" })
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Prijavi se</button>
+        }
+
+        <div class="auth-link">
+            Nemate nalog? <a href="@Url.Action("RegistrujOrganizatora", "Organizator")">Registrujte se</a>
+        </div>
+    </div>
+</div>

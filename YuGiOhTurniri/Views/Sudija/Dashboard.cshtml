@@ -1,0 +1,80 @@
+@model List<YuGiOhTurniri.Models.SpiloveNaRevizijuVM>
+
+@{
+    ViewBag.Title = "Sudija Panel";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="max-width: 1000px; margin: 0 auto;">
+    <div class="page-header">
+        <h1 class="page-title">Sudijski Panel</h1>
+        <p class="page-subtitle">Pregledjte spilove i upravaljte ban listom</p>
+    </div>
+
+    @if (ViewBag.Greska != null)
+    {
+        <div class="alert alert-danger">@ViewBag.Greska</div>
+    }
+
+    <div class="dashboard-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; margin-top: 2rem;">
+        <!-- Pregled Spilova -->
+        <div class="dashboard-card" style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+            <h3>Pregled Spilova</h3>
+            <p>Pregledajte sve spilove koji ?ekaju na reviziju i odlu?ite da li su uskla?eni sa pravilima.</p>
+            <a href="@Url.Action("SpiloveNaCekanju", "Sudija")" class="btn btn-primary" style="display: inline-block; margin-top: 1rem;">Pregledaj Spilove</a>
+        </div>
+
+        <!-- Ban Lista -->
+        <div class="dashboard-card" style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+            <h3>Ban Lista</h3>
+            <p>Upravljajte zabranjenim kartama i pratite sve azuriranja ban liste.</p>
+            <a href="@Url.Action("BanLista", "Sudija")" class="btn btn-warning" style="display: inline-block; margin-top: 1rem;">Pogledaj Ban Listu</a>
+        </div>
+
+        <!-- Odjava -->
+        <div class="dashboard-card" style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+            <h3>Odjava</h3>
+            <p>Izloguj se iz sistema.</p>
+            <a href="@Url.Action("OdjavaS", "Sudija")" class="btn btn-danger" style="display: inline-block; margin-top: 1rem;">Odjavi se</a>
+        </div>
+    </div>
+
+    @if (Model != null && Model.Count > 0)
+    {
+        <div style="margin-top: 3rem;">
+            <h2 style="margin-bottom: 1.5rem; border-bottom: 2px solid #667eea; padding-bottom: 0.5rem;">Spilovi na Cekanju</h2>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+                @foreach (var spil in Model)
+                {
+                    <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h4 style="margin-top: 0;">@spil.Naziv</h4>
+                        <p><strong>Format:</strong> @spil.Format</p>
+                        <p><strong>Arhetip:</strong> @spil.Arhetip</p>
+                        <p><strong>Status:</strong> <span class="badge" style="background: #ffc107; color: #333; padding: 0.25rem 0.75rem; border-radius: 4px; font-weight: bold;">@spil.Status</span></p>
+                        <p><strong>Kreiran:</strong> @spil.DatumKreiranja.ToString("dd.MM.yyyy")</p>
+                        <a href="@Url.Action("PregledajSpil", "Sudija", new { id = spil.SpilID })" class="btn btn-primary" style="display: inline-block; padding: 0.5rem 1rem; background: #667eea; color: white; border-radius: 4px; text-decoration: none; font-size: 0.9rem;">Pregledaj</a>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    function openModal(id) {
+        document.getElementById("odbijModal" + id).classList.add("show");
+        document.getElementById("odbijModal" + id).style.display = "block";
+    }
+
+    function closeModal(id) {
+        document.getElementById("odbijModal" + id).classList.remove("show");
+        document.getElementById("odbijModal" + id).style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        if (event.target.classList.contains("modal")) {
+            event.target.style.display = "none";
+        }
+    }
+</script>

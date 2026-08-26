@@ -1,0 +1,117 @@
+@model List<YuGiOhTurniri.Models.OtvoreniTurniriVM>
+
+@{
+    ViewBag.Title = "Otvoreni Turniri";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .badge-otvoren {
+        background-color: #28a745;
+        color: white;
+        padding: 0.35rem 0.65rem;
+        border-radius: 0.25rem;
+        font-weight: 600;
+        font-size: 13px !important;
+    }
+    .badge-zavrsen {
+        background-color: #6c757d;
+        color: white;
+        padding: 0.35rem 0.65rem;
+        border-radius: 0.25rem;
+        font-weight: 600;
+        font-size: 13px !important;
+    }
+    .badge-prijavljen {
+        background-color: #0d6efd;
+        color: white;
+        padding: 0.35rem 0.65rem;
+        border-radius: 0.25rem;
+        font-weight: 600;
+        font-size: 13px !important;
+    }
+</style>
+
+<div class="page-header">
+    <h1 class="page-title">Otvoreni Turniri</h1>
+    <p class="page-subtitle">Prijavite se na turnire sa dostupnim mjestima</p>
+</div>
+
+@if (ViewBag.Poruka != null)
+{
+    <div class="alert alert-success">
+        @ViewBag.Poruka
+    </div>
+}
+
+@if (ViewBag.Greska != null)
+{
+    <div class="alert alert-danger">
+        @ViewBag.Greska
+    </div>
+}
+
+@if (Model == null || Model.Count == 0)
+{
+    <div class="alert alert-info">
+        Trenutno nema otvorenih turnira za prijavu.
+    </div>
+}
+else
+{
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
+        @foreach (var turnir in Model)
+        {
+            <div class="card">
+                <div class="card-header">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="margin: 0;">@turnir.Naziv</h3>
+                        @if (turnir.IsUserRegistered)
+                        {
+                            <span class="badge badge-prijavljen">Prijavljen</span>
+                        }
+                        else if (turnir.Status == "Otvoren")
+                        {
+                            <span class="badge badge-otvoren">Otvoreno</span>
+                        }
+                        else if (turnir.Status == "Zavrsen")
+                        {
+                            <span class="badge badge-zavrsen">Zavrseno</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-danger">Otkazano</span>
+                        }
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p><strong>Lokacija:</strong> @turnir.Lokacija</p>
+                    <p><strong>Format:</strong> @turnir.Format</p>
+                    <p><strong>Datum:</strong> @turnir.DatumOdrzavanja.ToString("dd.MM.yyyy")</p>
+                    <p><strong>Prijavljeni:</strong> @turnir.BrojPrijavljenih</p>
+                    @if (!string.IsNullOrEmpty(turnir.OrganizatorIme))
+                    {
+                        <p><strong>Organizator:</strong> @turnir.OrganizatorIme</p>
+                    }
+                </div>
+                <div style="padding: 1rem;">
+                    @if (turnir.IsUserRegistered)
+                    {
+                        <button class="btn btn-secondary btn-block" disabled>Vec ste prijavljeni</button>
+                    }
+                    else if (turnir.Status == "Otvoren")
+                    {
+                        <a href="@Url.Action("PrijaviSeTurnir", "Takmicar", new { id = turnir.TurnirID })" class="btn btn-success btn-block">
+                            Prijavi se
+                        </a>
+                    }
+                    else
+                    {
+                        <button class="btn btn-secondary btn-block" disabled>Turnir nije otvoren</button>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+

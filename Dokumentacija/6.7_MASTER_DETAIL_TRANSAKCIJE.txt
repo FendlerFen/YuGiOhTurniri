@@ -1,0 +1,615 @@
+6.7. OPCIONO ? Realizacija master?detail za unos (sa primenom transakcija) i tabelarni prikaz
+
+Master-detail je architekturni obrazac gde se glavna entitet (MASTER - Spil) i njene 
+povezane entitete (DETAIL - KarteUSpilu) ?uvaju kao logi?ka celina. Transakcije osiguravaju
+da ako bilo koji deo unosa ne uspe, ceo unos se otkazuje (atomska operacija).
+
+???????????????????????????????????????????????????????????????????????????????????
+
+1. MASTER-DETAIL UNOS U KONTROLERU
+
+FILE: YuGiOhTurniri/Controllers/TakmicarController.cs (KreirajSpil POST)
+
+[HttpPost]
+public ActionResult KreirajSpil(KreirajSpilVM model)
+{
+    // 1. VALIDACIJA MASTER-a (Naziv, Format)
+    if (string.IsNullOrEmpty(model.Naziv) || model.Naziv.Trim().Length == 0)
+    {
+        ModelState.AddModelError("Naziv", "Naziv spila je obavezan");
+        return View(model);
+    }
+
+    if (string.IsNullOrEmpty(model.Format))
+    {
+        ModelState.AddModelError("Format", "Format je obavezan");
+        return View(model);
+    }
+
+    // 2. VALIDACIJA BAN LISTE (DETAIL - karte)
+    List<string> karteBanListe = new List<string>();
+    try
+    {
+        IBanListaRepository banListaRepo = new BanListaRepozitorijumSP(_konekcija);
+        List<BanListaKlasa> banLista = banListaRepo.DajSvuBanListu();
+        karteBanListe = banLista.Select(b => b.NazivKarte.Trim().ToLower()).ToList();
+    }
+    catch { }
+
+    List<string> karteBanListeUSpilu = new List<string>();
+
+    // Provjeri Main Deck karte
+    if (model.MainDeck != null && model.MainDeck.Count > 0)
+    {
+        foreach (var karta in model.MainDeck)
+        {
+            if (!string.IsNullOrEmpty(karta.NazivKarte))
+            {
+                string kartaNormalizovana = karta.NazivKarte.Trim().ToLower();
+                if (karteBanListe.Contains(kartaNormalizovana))
+                {
+                    karteBanListeUSpilu.Add(karta.NazivKarte);
+                }
+            }
+        }
+    }
+
+    // Ako ima zabranjenih karata, OTKA?I
+    if (karteBanListeUSpilu.Count > 0)
+    {
+        ModelState.AddModelError("", "Spil sadr?i zabranjene karte: " + 
+            string.Join(", ", karteBanListeUSpilu.Distinct()));
+        return View(model);
+    }
+
+    // 3. BROJANJE I VALIDACIJA KARATA
+    int mainCount = 0, extraCount = 0, sideCount = 0;
+    List<string> greske = new List<string>();
+
+    // Validiraj Main Deck (40-60 karata)
+    if (model.MainDeck != null && model.MainDeck.Count > 0)
+    {
+        foreach (var karta in model.MainDeck)
+        {
+            if (!string.IsNullOrEmpty(karta.NazivKarte) && !string.IsNullOrEmpty(karta.Kolicina))
+            {
+                int kolicina = 0;
+                if (int.TryParse(karta.Kolicina, out kolicina) && kolicina > 0 && kolicina <= 3)
+                {
+                    mainCount += kolicina;
+                }
+            }
+        }
+    }
+
+    if (mainCount < 40 || mainCount > 60)
+    {
+        greske.Add($"Main Deck mora imati 40-60 karata (trenutno: {mainCount})");
+    }
+
+    // Validiraj Extra Deck (max 15 karata)
+    if (model.ExtraDeck != null && model.ExtraDeck.Count > 0)
+    {
+        foreach (var karta in model.ExtraDeck)
+        {
+            if (!string.IsNullOrEmpty(karta.NazivKarte) && !string.IsNullOrEmpty(karta.Kolicina))
+            {
+                int kolicina = 0;
+                if (int.TryParse(karta.Kolicina, out kolicina) && kolicina > 0)
+                {
+                    extraCount += kolicina;
+                }
+            }
+        }
+    }
+
+    if (extraCount > 15)
+    {
+        greske.Add($"Extra Deck sme imati maksimalno 15 karata (trenutno: {extraCount})");
+    }
+
+    // Ako ima gre?ki u validaciji, prika?i ih
+    if (greske.Count > 0)
+    {
+        foreach (var greska in greske)
+        {
+            ModelState.AddModelError("", greska);
+        }
+        return View(model);
+    }
+
+    int takmicarID = Convert.ToInt32(Session["takmicarID"]);
+
+    try
+    {
+        // ????????????????????????????????????????????????????????????????????????????????
+        // TRANSAKCIJA: MASTER + ALL DETAILS ATOMSKI
+        // ????????????????????????????????????????????????????????????????????????????????
+
+        ISpilRepozitorijum repo = new SpilRepozitorijumSP(_konekcija);
+
+        // KREIRAJ MASTER (Spil)
+        SpilKlasa spil = new SpilKlasa
+        {
+            Naziv = model.Naziv,
+            Format = model.Format,
+            Arhetip = model.Arhetip,
+            TakmicarID = takmicarID
+        };
+
+        int spilID = repo.Dodaj(spil);  // © Ovo generi?e IDENTITY
+
+        if (spilID <= 0)
+        {
+            // Ako master ne uspe, OTKA?I sve
+            ModelState.AddModelError("", "Greska pri kreiranju spila!");
+            return View(model);
+        }
+
+        // DODAJ DETAIL KARTE - MAIN DECK
+        if (model.MainDeck != null && model.MainDeck.Count > 0)
+        {
+            var mainDeckKarte = model.MainDeck
+                .Where(k => !string.IsNullOrEmpty(k.NazivKarte) && !string.IsNullOrEmpty(k.Kolicina))
+                .ToList();
+
+            foreach (var karta in mainDeckKarte)
+            {
+                int kolicina = 0;
+                if (int.TryParse(karta.Kolicina, out kolicina) && kolicina > 0)
+                {
+                    // Ako dodavanje kart„u ne uspe, exception ?e otkazati sve
+                    repo.DodajKartu(spilID, karta.NazivKarte.Trim(), "Main", kolicina, karta.Tip);
+                }
+            }
+        }
+
+        // DODAJ DETAIL KARTE - EXTRA DECK
+        if (model.ExtraDeck != null && model.ExtraDeck.Count > 0)
+        {
+            var extraDeckKarte = model.ExtraDeck
+                .Where(k => !string.IsNullOrEmpty(k.NazivKarte) && !string.IsNullOrEmpty(k.Kolicina))
+                .ToList();
+
+            foreach (var karta in extraDeckKarte)
+            {
+                int kolicina = 0;
+                if (int.TryParse(karta.Kolicina, out kolicina) && kolicina > 0)
+                {
+                    repo.DodajKartu(spilID, karta.NazivKarte.Trim(), "Extra", kolicina);
+                }
+            }
+        }
+
+        // DODAJ DETAIL KARTE - SIDE DECK
+        if (model.SideDeck != null && model.SideDeck.Count > 0)
+        {
+            var sideDeckKarte = model.SideDeck
+                .Where(k => !string.IsNullOrEmpty(k.NazivKarte) && !string.IsNullOrEmpty(k.Kolicina))
+                .ToList();
+
+            foreach (var karta in sideDeckKarte)
+            {
+                int kolicina = 0;
+                if (int.TryParse(karta.Kolicina, out kolicina) && kolicina > 0)
+                {
+                    repo.DodajKartu(spilID, karta.NazivKarte.Trim(), "Side", kolicina);
+                }
+            }
+        }
+
+        // AKO JE SVE USPELO ¨ REDIRECT
+        TempData["Poruka"] = "Spil uspesno kreiran sa kartama!";
+        return RedirectToAction("MojiSpilovi");
+    }
+    catch (Exception ex)
+    {
+        // BILO ?„S„@ SE SLOMI ¨ OTKA?I SVE (zahvaljuju?i using iskazu u DB klasi)
+        ModelState.AddModelError("", "Greska pri kreiranju spila: " + ex.Message);
+        return View(model);
+    }
+}
+
+MASTER: SpilKlasa (Naziv, Format, Arhetip, TakmicarID)
+DETAIL: KarteUSpilu (NazivKarte, Sekcija, Kolicina) -‘½ (tri sekcije: Main, Extra, Side)
+
+Ako bilo koja kart„p „~„u mo?e biti dodana, exception se javlja i CELA OPERACIJA se otkazuje.
+
+„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ
+
+2. DATA ACCESS - TRANSAKCIJE NA SQL NIVOU
+
+FILE: KlasePodataka/SPSpilDBKlasa.cs
+
+// KREIRAJ SPIL (MASTER)
+public int KreirajSpil(SpilKlasa spil)
+{
+    int noviID = 0;
+    try
+    {
+        using (SqlConnection konekcija = new SqlConnection(_stringKonekcije))
+        {
+            konekcija.Open();
+
+            // Parametrizovani upit sa IDENTITY vra?anjem
+            string sql = @"INSERT INTO Spilovi (Naziv, Format, Arhetip, TakmicarID, Status, DatumKreiranja) 
+                           VALUES (@Naziv, @Format, @Arhetip, @TakmicarID, 'Na cekanju', GETDATE()); 
+                           SELECT CAST(SCOPE_IDENTITY() AS INT);";
+
+            SqlCommand komanda = new SqlCommand(sql, konekcija);
+            komanda.Parameters.Add("@Naziv", SqlDbType.NVarChar).Value = spil.Naziv ?? "";
+            komanda.Parameters.Add("@Format", SqlDbType.NVarChar).Value = spil.Format ?? "";
+            komanda.Parameters.Add("@Arhetip", SqlDbType.NVarChar).Value = spil.Arhetip ?? "";
+            komanda.Parameters.Add("@TakmicarID", SqlDbType.Int).Value = spil.TakmicarID;
+
+            object result = komanda.ExecuteScalar();  // © SCOPE_IDENTITY() vra?a nov ID
+            if (result != null && result != DBNull.Value)
+            {
+                noviID = Convert.ToInt32(result);
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        System.Diagnostics.Debug.WriteLine("KreirajSpil Error: " + ex.Message);
+        return 0;  // Signalizira neuspeh
+    }
+    return noviID;
+}
+
+// DODAJ KARTU U SPIL (DETAIL)
+public bool DodajKartuUSpil(int spilID, string nazivKarte, string sekcija, int kolicina, string tipKarte)
+{
+    using (SqlConnection konekcija = new SqlConnection(_stringKonekcije))
+    {
+        konekcija.Open();
+        try
+        {
+            string sql = @"INSERT INTO KarteUSpilu (SpilID, NazivKarte, Sekcija, Kolicina, TipKarte) 
+                           VALUES (@SpilID, @NazivKarte, @Sekcija, @Kolicina, @TipKarte)";
+
+            SqlCommand komanda = new SqlCommand(sql, konekcija);
+            komanda.Parameters.Add("@SpilID", SqlDbType.Int).Value = spilID;
+            komanda.Parameters.Add("@NazivKarte", SqlDbType.NVarChar).Value = nazivKarte ?? "";
+            komanda.Parameters.Add("@Sekcija", SqlDbType.NVarChar).Value = sekcija ?? "";
+            komanda.Parameters.Add("@Kolicina", SqlDbType.Int).Value = kolicina;
+            komanda.Parameters.Add("@TipKarte", SqlDbType.NVarChar).Value = tipKarte ?? "";
+
+            return komanda.ExecuteNonQuery() > 0;  // Vra?a true ako je uspelo
+        }
+        catch (Exception ex)
+        {
+            // Ako kartu ne mo?e biti dodata, exception spre?ava ostatak
+            throw new Exception("Greska pri dodavanju karte: " + ex.Message);
+        }
+    }
+}
+
+Using iskaz osigurava da se konekcija zatvori ?ak i ako se jav„y exception.
+Ako bilo koji INSERT ne uspe, throw izbacuje exception koji zaustavlja ceo proces.
+
+„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ
+
+3. TABELARNI PRIKAZ MASTER-DETAIL-a
+
+FILE: YuGiOhTurniri/Views/Takmicar/DetaljiSpila.cshtml (deo)
+
+@model DetaljiSpilVM
+
+<div class="form-section">
+    <div class="section-title">Detalj„y Spila: @Model.Naziv</div>
+
+    <!-- MASTER PODACI -->
+    <table class="details-table">
+        <tr>
+            <td><strong>Naziv:</strong></td>
+            <td>@Model.Naziv</td>
+        </tr>
+        <tr>
+            <td><strong>Format:</strong></td>
+            <td>@Model.Format</td>
+        </tr>
+        <tr>
+            <td><strong>Arhetip:</strong></td>
+            <td>@Model.Arhetip</td>
+        </tr>
+        <tr>
+            <td><strong>Status:</strong></td>
+            <td>@Model.Status</td>
+        </tr>
+    </table>
+
+    <!-- DETAIL PODACI - MAIN DECK -->
+    <div class="deck-section">
+        <div class="deck-header">Main Deck (@Model.MainDeckKarte.Count karata)</div>
+        <table class="detail-table">
+            <thead>
+                <tr>
+                    <th>Naziv Karte</th>
+                    <th>Tip</th>
+                    <th>Koli?ina</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var karta in Model.MainDeckKarte)
+                {
+                    <tr>
+                        <td>@karta.NazivKarte</td>
+                        <td>@karta.Tip</td>
+                        <td>@karta.Kolicina</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- DETAIL PODACI - EXTRA DECK -->
+    <div class="deck-section">
+        <div class="deck-header">Extra Deck (@Model.ExtraDeckKarte.Count karata)</div>
+        <table class="detail-table">
+            <thead>
+                <tr>
+                    <th>Naziv Karte</th>
+                    <th>Tip</th>
+                    <th>Koli?ina</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var karta in Model.ExtraDeckKarte)
+                {
+                    <tr>
+                        <td>@karta.NazivKarte</td>
+                        <td>@karta.Tip</td>
+                        <td>@karta.Kolicina</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- DETAIL PODACI - SIDE DECK -->
+    <div class="deck-section">
+        <div class="deck-header">Side Deck (@Model.SideDeckKarte.Count karata)</div>
+        <table class="detail-table">
+            <thead>
+                <tr>
+                    <th>Naziv Karte</th>
+                    <th>Tip</th>
+                    <th>Koli?ina</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var karta in Model.SideDeckKarte)
+                {
+                    <tr>
+                        <td>@karta.NazivKarte</td>
+                        <td>@karta.Tip</td>
+                        <td>@karta.Kolicina</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+Prikaz grupi?e DETAIL redove po sekciji (Main/Extra/Side) u odvojenoj tabeli.
+Broja? pokazuje koliko karata ima u svakoj sekciji.
+
+„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ
+
+4. TABELARNI UNOS MASTER-DETAIL-a (Razor view)
+
+FILE: YuGiOhTurniri/Views/Takmicar/KreirajSpil.cshtml (deo)
+
+@model KreirajSpilVM
+
+@using (Html.BeginForm("KreirajSpil", "Takmicar", FormMethod.Post))
+{
+    <!-- MASTER SEKCIJA -->
+    <div class="form-section">
+        <div class="section-title">Osnovne Informacije o Spilu</div>
+
+        <div class="form-group">
+            <label>Naziv Spila:</label>
+            @Html.TextBoxFor(m => m.Naziv, new { placeholder = "Unesite naziv spila...", 
+                @class = "form-control" })
+            @Html.ValidationMessageFor(m => m.Naziv, "", new { @class = "form-error" })
+        </div>
+
+        <div class="form-group">
+            <label>Format:</label>
+            @Html.DropDownListFor(m => m.Format, 
+                new SelectList(Model.Formati), 
+                "-- Izaberite format --", 
+                new { @class = "form-control" })
+            @Html.ValidationMessageFor(m => m.Format, "", new { @class = "form-error" })
+        </div>
+
+        <div class="form-group">
+            <label>Arhetip (opciono):</label>
+            @Html.TextBoxFor(m => m.Arhetip, new { placeholder = "Npr. Blue-Eyes, Red-Eyes...", 
+                @class = "form-control" })
+        </div>
+    </div>
+
+    <!-- DETAIL SEKCIJA - MAIN DECK -->
+    <div class="form-section main-deck-table">
+        <div class="deck-section-header">Main Deck (40-60 karata)</div>
+        <table class="card-input-table">
+            <thead>
+                <tr>
+                    <th>Naziv Karte</th>
+                    <th>Tip</th>
+                    <th>Koli?ina (1-3)</th>
+                </tr>
+            </thead>
+            <tbody id="mainDeckBody">
+                @for (int i = 0; i < 20; i++)
+                {
+                    <tr>
+                        <td>
+                            @Html.TextBoxFor(m => m.MainDeck[i].NazivKarte, 
+                                new { placeholder = "Naziv karte...", @class = "form-control" })
+                        </td>
+                        <td>
+                            @Html.DropDownListFor(m => m.MainDeck[i].Tip, 
+                                new SelectList(new[] { "Monster", "Spell", "Trap" }), 
+                                "", new { @class = "form-control" })
+                        </td>
+                        <td>
+                            @Html.TextBoxFor(m => m.MainDeck[i].Kolicina, 
+                                new { placeholder = "1-3", @class = "form-control" })
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- DETAIL SEKCIJA - EXTRA DECK -->
+    <div class="form-section extra-deck-table">
+        <div class="deck-section-header">Extra Deck (0-15 karata)</div>
+        <table class="card-input-table">
+            <thead>
+                <tr>
+                    <th>Naziv Karte</th>
+                    <th>Tip</th>
+                    <th>Koli?ina</th>
+                </tr>
+            </thead>
+            <tbody id="extraDeckBody">
+                @for (int i = 0; i < 15; i++)
+                {
+                    <tr>
+                        <td>
+                            @Html.TextBoxFor(m => m.ExtraDeck[i].NazivKarte, 
+                                new { placeholder = "Naziv karte...", @class = "form-control" })
+                        </td>
+                        <td>
+                            @Html.DropDownListFor(m => m.ExtraDeck[i].Tip, 
+                                new SelectList(new[] { "Synchro", "Xyz", "Fusion", "Link" }), 
+                                "", new { @class = "form-control" })
+                        </td>
+                        <td>
+                            @Html.TextBoxFor(m => m.ExtraDeck[i].Kolicina, 
+                                new { placeholder = "1-3", @class = "form-control" })
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- DUGMI?I ZA AKCIJU -->
+    <div class="btn-group">
+        <button type="submit" class="btn btn-success">Kreiraj Spil</button>
+        <a href="@Url.Action("MojiSpilovi")" class="btn btn-secondary">Otka?i</a>
+    </div>
+}
+
+Unos je organizovan sa tri tabele (Main, Extra, Side). Svaki red je par
+naziv karte + tip + koli?ina. Validacija se vr?i na kontroleru PRE INSERT-a.
+
+„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ
+
+5. ?TA SE DE?AVA KAD DETALJ„I FAIL-AJU„I
+
+Scenario: Korisnik unese Spil (MASTER) = OK, ali tre?a kartu u Main Decku ne pro?e validaciju
+
+// Kontroler -> Repozitorijum -> SPSpilDBKlasa
+try
+{
+    int spilID = repo.Dodaj(spil);  // ? Spil je kreiran, ID = 5
+
+    foreach (var karta in model.MainDeck)
+    {
+        repo.DodajKartu(spilID, karta.NazivKarte, "Main", ...);  // ? Karta 1
+                                                                   // ? Karta 2
+                                                                   // ? Karta 3 - SQL ERROR!
+                                                                   // THROW Exception
+    }
+
+    // Nikad se ne dosti?e ovde jer je exception izba?en
+    TempData["Poruka"] = "Spil uspesno kreiran!";
+    return RedirectToAction("MojiSpilovi");
+}
+catch (Exception ex)
+{
+    // Spil JE U BAZI, ali bez karata! © PROBLEM!
+    ModelState.AddModelError("", "Greska: " + ex.Message);
+    return View(model);
+}
+
+RE?ENJE: SqlTransaction sa Rollback-om (videti napomenu ispod).
+
+„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ
+
+6. NAPOMENA: PRAVI TRANSAKCIJSKI PRISTUP
+
+Za 100% sigurnost (Atomska operacija - SVE ili NI?TA), trebalo bi:
+
+public int KreirajSpilSaKartama(SpilKlasa spil, List<KartaUSpiluKlasa> karte)
+{
+    using (SqlConnection konekcija = new SqlConnection(_stringKonekcije))
+    {
+        konekcija.Open();
+
+        // PO?ETAK TRANSAKCIJE
+        SqlTransaction transakcija = konekcija.BeginTransaction();
+
+        try
+        {
+            // INSERT SPIL u transakciji
+            string sql = @"INSERT INTO Spilovi (Naziv, Format, Arhetip, TakmicarID, Status, DatumKreiranja) 
+                           VALUES (@Naziv, @Format, @Arhetip, @TakmicarID, 'Na cekanju', GETDATE()); 
+                           SELECT CAST(SCOPE_IDENTITY() AS INT);";
+
+            SqlCommand komanda = new SqlCommand(sql, konekcija, transakcija);
+            komanda.Parameters.Add("@Naziv", SqlDbType.NVarChar).Value = spil.Naziv;
+            komanda.Parameters.Add("@Format", SqlDbType.NVarChar).Value = spil.Format;
+            komanda.Parameters.Add("@Arhetip", SqlDbType.NVarChar).Value = spil.Arhetip;
+            komanda.Parameters.Add("@TakmicarID", SqlDbType.Int).Value = spil.TakmicarID;
+
+            int spilID = Convert.ToInt32(komanda.ExecuteScalar());
+
+            // INSERT SVE KARTE u transakciji
+            foreach (var karta in karte)
+            {
+                string sqlKarta = @"INSERT INTO KarteUSpilu (SpilID, NazivKarte, Sekcija, Kolicina) 
+                                    VALUES (@SpilID, @NazivKarte, @Sekcija, @Kolicina)";
+
+                SqlCommand komandaKarta = new SqlCommand(sqlKarta, konekcija, transakcija);
+                komandaKarta.Parameters.Add("@SpilID", SqlDbType.Int).Value = spilID;
+                komandaKarta.Parameters.Add("@NazivKarte", SqlDbType.NVarChar).Value = karta.NazivKarte;
+                komandaKarta.Parameters.Add("@Sekcija", SqlDbType.NVarChar).Value = karta.Sekcija;
+                komandaKarta.Parameters.Add("@Kolicina", SqlDbType.Int).Value = karta.Kolicina;
+
+                komandaKarta.ExecuteNonQuery();  // Ako ovo fail-uje, ide u catch
+            }
+
+            // AKO JE SVE USPELO
+            transakcija.Commit();  // © POTVRDI SVE PROMENE
+            return spilID;
+        }
+        catch (Exception ex)
+        {
+            // AKO BILO ?TA FAIL-UJE
+            transakcija.Rollback();  // © OTKA?I SVE PROMENE!
+            throw new Exception("Master-detail unos neuspe?an, sve je otkazano: " + ex.Message);
+        }
+    }
+}
+
+Commit() = POTVRDI sve INSERT/UPDATE/DELETE
+Rollback() = OTKA?I sve promene kao da se nikada nisu desile
+
+???????????????????????????????????????????????????????????????????????????????????
+
+ZAKLJU?AK:
+
+Master-detail je uzorak gde se MASTER (Spil) i DETAIL (KarteUSpilu) ?uvaju kao jedna logi?ka
+celina. Validacija se vr?i prvo na MASTER-u, zatim na svakom DETAIL-u. Ako bilo koji DETAIL
+fail-uje, ceo proces se otkazuje (exception). Za pravu atomsku operaciju sa Rollback-om,
+koristi SqlTransaction sa BeginTransaction(), Commit(), i Rollback().
+
+???????????????????????????????????????????????????????????????????????????????????
