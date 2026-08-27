@@ -32,8 +32,6 @@ namespace Prezentaciona_Logika
                 }
 
                 string json = File.ReadAllText(putanja);
-                // JsonConvert zahteva Newtonsoft.Json - zakomentarisano
-                // _parametri = JsonConvert.DeserializeObject(json);
                 _parametri = null;
             }
             catch (Exception ex)

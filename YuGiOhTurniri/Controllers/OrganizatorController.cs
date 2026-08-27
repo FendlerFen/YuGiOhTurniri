@@ -500,7 +500,7 @@ namespace YuGiOhTurniri.Controllers
             {
                 SPTurnirDBKlasa db = new SPTurnirDBKlasa(_konekcija);
 
-                // Dohvati sve takmi?are koji su se prijavili na turnir
+                // Dohvati sve takmicare koji su se prijavili na turnir
                 DataSet dsTakmicari = db.DajTakmicareNaTurniru(id);
 
                 var vm = new Models.ProclasiPobjednikeVM

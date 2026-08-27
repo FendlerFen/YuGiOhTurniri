@@ -25,7 +25,7 @@ namespace YuGiOhTurniri.Controllers
             base.OnActionExecuting(filterContext);
         }
 
-        // ====== PO?ETNA STRANICA ======
+        // ====== POCETNA STRANICA ======
         public ActionResult Index()
         {
             if (Session["sudijaID"] == null)
@@ -51,7 +51,6 @@ namespace YuGiOhTurniri.Controllers
 
             try
             {
-                // Hardcoded sudija kredencijali
                 if (email == "SudijaJV@gmail.com" && lozinka == "Loz123")
                 {
                     Session["sudijaID"] = 1;
@@ -91,7 +90,7 @@ namespace YuGiOhTurniri.Controllers
             }
         }
 
-        // ====== SPILOVI NA ?EKANJU ======
+        // ====== SPILOVI NA CEKANJU ======
         public ActionResult SpiloveNaCekanju()
         {
             return Dashboard();
@@ -201,7 +200,7 @@ namespace YuGiOhTurniri.Controllers
                     });
                 }
 
-                // Dohvati takmi?ara koji je kreirao spil
+                // Dohvati takmicara koji je kreirao spil
                 string takmicarIme = "";
                 if (spil.TakmicarID > 0)
                 {
@@ -264,14 +263,14 @@ namespace YuGiOhTurniri.Controllers
                 }
                 else
                 {
-                    TempData["Greska"] = "Gre?ka pri promjeni statusa spila!";
+                    TempData["Greska"] = "Greska pri promjeni statusa spila!";
                 }
 
                 return RedirectToAction("SpiloveNaCekanju");
             }
             catch (Exception ex)
             {
-                TempData["Greska"] = "Gre?ka: " + ex.Message;
+                TempData["Greska"] = "Greska: " + ex.Message;
                 return RedirectToAction("SpiloveNaCekanju");
             }
         }

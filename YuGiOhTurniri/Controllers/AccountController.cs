@@ -47,7 +47,6 @@ namespace YuGiOhTurniri.Controllers
                 return RedirectToAction("Index", "Takmicar");
             }
 
-            // Login failed - set error and stay on the same page
             ViewBag.Greska = "Pogresan email ili lozinka!";
             return View(model);
         }

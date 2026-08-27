@@ -249,7 +249,7 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
-    <Content Include="Scripts\validacija_novo.js" />
+    <Content Include="Scripts\validacija.js" />
     <Content Include="Slike\bg_101621.png" />
     <Content Include="Slike\bg_130103.png" />
     <Content Include="Slike\bg_130306.png" />
@@ -296,7 +296,6 @@
     <Content Include="Views\Takmicar\Index.cshtml" />
     <Content Include="Views\Takmicar\BanLista.cshtml" />
     <Content Include="Views\Takmicar\PrijaviSeTurnir.cshtml" />
-    <Content Include="Views\Organizator\PrijaviOrganizatora_NEW.cshtml" />
     <Content Include="Views\Organizator\KreirajTurnir.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>

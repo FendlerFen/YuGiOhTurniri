@@ -310,19 +310,25 @@ namespace YuGiOhTurniri.Controllers
             }
 
             // VALIDACIJA: Provera veličine decka prema YU-GI-OH pravilima
-            if (mainCount < 40 || mainCount > 60)
+            var ogranicenja = new Servisi.OgranicenjaServis();
+            int minMain = ogranicenja.DajMinBrojKarataMain();
+            int maxMain = ogranicenja.DajMaxBrojKarataMain();
+            int maxExtra = ogranicenja.DajMaxBrojKarataExtra();
+            int maxSide = ogranicenja.DajMaxBrojKarataSide();
+
+            if (mainCount < minMain || mainCount > maxMain)
             {
-                greske.Add($"Main Deck mora imati 40-60 karata (trenutno: {mainCount})");
+                greske.Add($"Main Deck mora imati {minMain}-{maxMain} karata (trenutno: {mainCount})");
             }
 
-            if (extraCount > 15)
+            if (extraCount > maxExtra)
             {
-                greske.Add($"Extra Deck sme imati maksimalno 15 karata (trenutno: {extraCount})");
+                greske.Add($"Extra Deck sme imati maksimalno {maxExtra} karata (trenutno: {extraCount})");
             }
 
-            if (sideCount > 15)
+            if (sideCount > maxSide)
             {
-                greske.Add($"Side Deck sme imati maksimalno 15 karata (trenutno: {sideCount})");
+                greske.Add($"Side Deck sme imati maksimalno {maxSide} karata (trenutno: {sideCount})");
             }
 
             // Ako nema Main Deck-a
@@ -606,7 +612,7 @@ namespace YuGiOhTurniri.Controllers
                     }
                 }
 
-                // Validacija 2: Proverava duplikate - NO! Samo ako je NOVA karta (tekst se promenio)
+                // Validacija 2: Proverava duplikate - Samo ako je NOVA karta (tekst se promenio)
                 var kartePoSekciji = model.Karte.ToDictionary(k => k.KartaUSpiluID, k => k);
                 foreach (var izmena in izmeneKarata)
                 {
@@ -662,19 +668,25 @@ namespace YuGiOhTurniri.Controllers
                 }
 
                 // Validacija 4: Proverava veličine decka
-                if (mainCount < 40 || mainCount > 60)
+                var ogranicenja = new Servisi.OgranicenjaServis();
+                int minMain = ogranicenja.DajMinBrojKarataMain();
+                int maxMain = ogranicenja.DajMaxBrojKarataMain();
+                int maxExtra = ogranicenja.DajMaxBrojKarataExtra();
+                int maxSide = ogranicenja.DajMaxBrojKarataSide();
+
+                if (mainCount < minMain || mainCount > maxMain)
                 {
-                    greske.Add($"Main Deck mora imati 40-60 karata (trenutno: {mainCount})");
+                    greske.Add($"Main Deck mora imati {minMain}-{maxMain} karata (trenutno: {mainCount})");
                 }
 
-                if (extraCount > 15)
+                if (extraCount > maxExtra)
                 {
-                    greske.Add($"Extra Deck sme imati maksimalno 15 karata (trenutno: {extraCount})");
+                    greske.Add($"Extra Deck sme imati maksimalno {maxExtra} karata (trenutno: {extraCount})");
                 }
 
-                if (sideCount > 15)
+                if (sideCount > maxSide)
                 {
-                    greske.Add($"Side Deck sme imati maksimalno 15 karata (trenutno: {sideCount})");
+                    greske.Add($"Side Deck sme imati maksimalno {maxSide} karata (trenutno: {sideCount})");
                 }
 
                 // Ako ima grešaka, prikaži ih
@@ -697,7 +709,7 @@ namespace YuGiOhTurniri.Controllers
                     Naziv = model.Naziv,
                     Format = model.Format,
                     Arhetip = model.Arhetip,
-                    Status = "Na cekanju"  // Postavi status na cekanje posle izmene
+                    Status = "Na cekanju" 
                 };
 
                 bool uspeh = repozitorijum.Izmeni(spil);

@@ -44,7 +44,7 @@ namespace PoslovnaLogika
             return true;
         }
 
-        // Ova metoda sada vraća TurnirKlasa umjesto StampajTurnirVM
+        // Metoda sada vraća TurnirKlasa umjesto StampajTurnirVM
         // VM klase se koriste samo u Kontrolerima
         public TurnirKlasa DajTurnirZaStampu(int turnirID)
         {

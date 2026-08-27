@@ -1,11 +1,4 @@
-// ============================================
-// SIMPLE CLIENT-SIDE VALIDATION
-// Only for UX - Server does final validation
-// ============================================
 
-/**
- * Simple email validation - just basic checks
- */
 function validacijaEmail(email) {
     if (!email || !email.trim()) {
         return { valid: false, error: 'Email je obavezan' };
@@ -17,16 +10,11 @@ function validacijaEmail(email) {
     return { valid: true, error: '' };
 }
 
-/**
- * Simple password validation - just length check
- */
+
 function validacijaLozinka(lozinka) {
     return lozinka && lozinka.length >= 6;
 }
 
-// ============================================
-// HELPER FUNKCIJE ZA PRIKAZ GRE?KE
-// ============================================
 
 function prikaziGresku(element, poruka) {
     if (!element) return;
@@ -55,14 +43,7 @@ function ukloniGresku(element) {
     element.style.borderColor = '#cbd5e0';
 }
 
-// ============================================
-// SIMPLE CLIENT-SIDE VALIDATION
-// Only for UX - Server does final validation
-// ============================================
 
-/**
- * Simple email validation - just basic checks
- */
 function validacijaEmail(email) {
     if (!email || !email.trim()) {
         return { valid: false, error: 'Email je obavezan' };
@@ -74,16 +55,11 @@ function validacijaEmail(email) {
     return { valid: true, error: '' };
 }
 
-/**
- * Simple password validation - just length check
- */
+
 function validacijaLozinka(lozinka) {
     return lozinka && lozinka.length >= 6;
 }
 
-// ============================================
-// HELPER FUNKCIJE ZA PRIKAZ GRE?KE
-// ============================================
 
 function prikaziGresku(element, poruka) {
     if (!element) return;
@@ -112,9 +88,6 @@ function ukloniGresku(element) {
     element.style.borderColor = '#cbd5e0';
 }
 
-// ============================================
-// FORM INITIALIZATION
-// ============================================
 
 function initializeFormValidation() {
     // Optional: Real-time email validation for better UX
@@ -132,7 +105,6 @@ function initializeFormValidation() {
         });
     });
 
-    // Optional: Real-time password validation
     const passwordInputs = document.querySelectorAll('input[name="Lozinka"]');
     passwordInputs.forEach(input => {
         input.addEventListener('blur', function() {
@@ -145,16 +117,13 @@ function initializeFormValidation() {
     });
 }
 
-// Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', function() {
     initializeFormValidation();
 });
 
 
-// Testiranje - ovo ?e biti vidljivo u console-u
-console.log('=== VALIDACIJA.JS U?ITANA ===');
+console.log('=== VALIDACIJA.JS UCITANA ===');
 
-// Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', function() {
     console.log('=== DOM Content Loaded ===');
     initializeFormValidation();

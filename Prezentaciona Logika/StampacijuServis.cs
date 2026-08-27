@@ -131,7 +131,6 @@ namespace Prezentaciona_Logika
                     sb.AppendLine("</div>");
                 }
 
-                // SUMMARY
                 sb.AppendLine("<div class='section'>");
                 sb.AppendLine("<h2>Rezime</h2>");
                 sb.AppendLine($"<div class='summary'>");

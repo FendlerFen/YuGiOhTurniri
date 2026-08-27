@@ -491,17 +491,17 @@
                 <div class="stat-box main-stat">
                     <div class="stat-label">Main Deck</div>
                     <div class="stat-value" id="mainCount">0</div>
-                    <div class="stat-info">Preporuceno: 40-60 karata</div>
+                    <div class="stat-info" id="mainInfo">Preporuceno: 40-60 karata</div>
                 </div>
                 <div class="stat-box extra-stat">
                     <div class="stat-label">Extra Deck</div>
                     <div class="stat-value" id="extraCount">0</div>
-                    <div class="stat-info">Maksimalno: 15 karata</div>
+                    <div class="stat-info" id="extraInfo">Maksimalno: 15 karata</div>
                 </div>
                 <div class="stat-box side-stat">
                     <div class="stat-label">Side Deck</div>
                     <div class="stat-value" id="sideCount">0</div>
-                    <div class="stat-info">Maksimalno: 15 karata</div>
+                    <div class="stat-info" id="sideInfo">Maksimalno: 15 karata</div>
                 </div>
             </div>
         </div>
@@ -707,6 +707,16 @@
         sideDeckCounter = sideRows > 0 ? sideRows : 1;
 
         updateCardCounts();
+
+        // U?itaj ograni?enja sa servera
+        fetch('@Url.Action("OgraniceSpila", "Servis")')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('mainInfo').textContent = `Preporuceno: ${data.mainDeckMin}-${data.mainDeckMax} karata`;
+                document.getElementById('extraInfo').textContent = `Maksimalno: ${data.extraDeckMax} karata`;
+                document.getElementById('sideInfo').textContent = `Maksimalno: ${data.sideDeckMax} karata`;
+            })
+            .catch(error => console.error('Greska pri ucitavanju ogranicenja:', error));
 
         // Prije submita, normalizuj sve indekse
         const form = document.getElementById('deckForm');

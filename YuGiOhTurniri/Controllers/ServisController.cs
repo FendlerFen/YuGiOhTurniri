@@ -5,14 +5,13 @@ using System.Web.Mvc;
 using KlasePodataka;
 using Repozitorijumi;
 using Newtonsoft.Json;
+using Servisi;
 
 namespace YuGiOhTurniri.Controllers
 {
-    /// <summary>
-    /// REST Servis - Parametrizacija i CRUD operacije
-    /// Namena 1: Obezbeđuje parametre za poslovnu logiku
-    /// Namena 2: Međusloj između prezentacionog sloja i sloja za rad sa podacima
-    /// </summary>
+    // REST Servis - Parametrizacija i CRUD operacije
+    // Obezbeđuje parametre za poslovnu logiku
+    // Međusloj između prezentacionog sloja i sloja za rad sa podacima
     public class ServisController : Controller
     {
         private readonly string _konekcija = ConfigurationManager.ConnectionStrings["Konekcija"].ConnectionString;
@@ -21,14 +20,14 @@ namespace YuGiOhTurniri.Controllers
         [HttpGet]
         public JsonResult OgraniceSpila()
         {
-            // Parametri za poslovnu logiku
+            var servis = new OgranicenjaServis();
             var ogranicenja = new
             {
-                mainDeckMin = 40,
-                mainDeckMax = 60,
-                extraDeckMax = 15,
-                sideDeckMax = 15,
-                maxTakmicaraNaTurniru = 999
+                mainDeckMin = servis.DajMinBrojKarataMain(),
+                mainDeckMax = servis.DajMaxBrojKarataMain(),
+                extraDeckMax = servis.DajMaxBrojKarataExtra(),
+                sideDeckMax = servis.DajMaxBrojKarataSide(),
+                maxTakmicaraNaTurniru = servis.DajMaxBrojTakmicara()
             };
 
             return Json(ogranicenja, JsonRequestBehavior.AllowGet);
