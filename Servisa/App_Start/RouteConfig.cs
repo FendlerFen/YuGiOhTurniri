@@ -5,7 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace YuGiOhTurniri
+namespace Servisa
 {
     public class RouteConfig
     {
@@ -13,13 +13,10 @@ namespace YuGiOhTurniri
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
-            // Omogućava [RoutePrefix]/[Route] na RestApiController (GET/POST/DELETE /api/...)
-            routes.MapMvcAttributeRoutes();
-
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
-                defaults: new { controller = "Kuca", action = "Index", id = UrlParameter.Optional }
+                defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
             );
         }
     }

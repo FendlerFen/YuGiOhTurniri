@@ -181,10 +181,8 @@
     <!-- Removed Doma?a Controller -->
     <!-- Removed Nalog Controller -->
     <Compile Include="Controllers\OrganizatorController.cs" />
-    <Compile Include="Controllers\RestApiController.cs" />
     <!-- Removed Doma?a Controller -->
     <Compile Include="Controllers\SudijaController.cs" />
-    <Compile Include="Controllers\TakmicarController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -206,6 +204,7 @@
     <Compile Include="Models\StampajSpilVM.cs" />
     <Compile Include="Models\StampajTurnirVM.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\HttpKlijentServis.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Prezentaciona Logika\Prezentaciona Logika.csproj">
