@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -20,12 +20,12 @@ namespace YuGiOhTurniri.Controllers
         {
             if (Session["takmicarID"] == null)
             {
-                filterContext.Result = RedirectToAction("PrijaviTakmicara", "Account");
+                filterContext.Result = RedirectToAction("PrijaviTakmicara", "Nalog");
             }
             base.OnActionExecuting(filterContext);
         }
 
-        // ====== POČETNA STRANICA ======
+        // ====== PO?ETNA STRANICA ======
         public ActionResult Index()
         {
             return View();
@@ -37,7 +37,7 @@ namespace YuGiOhTurniri.Controllers
             try
             {
                 IBanListaRepository repo = new BanListaRepozitorijumSP(_konekcija);
-                // Takmičar vidi sve zabranjene karte na ban listi
+                // Takmi?ar vidi sve zabranjene karte na ban listi
                 List<BanListaKlasa> banLista = repo.DajSvuBanListu();
 
                 List<BanListaPrikazVM> vm = new List<BanListaPrikazVM>();
@@ -55,12 +55,12 @@ namespace YuGiOhTurniri.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Greska = "Greška pri učitavanju ban liste: " + ex.Message;
+                ViewBag.Greska = "Gre?ka pri u?itavanju ban liste: " + ex.Message;
                 return View(new List<BanListaPrikazVM>());
             }
         }
 
-        // ====== MOJI SPILOVI (sa filterima i pretrагом) ======
+        // ====== MOJI SPILOVI (sa filterima i pretr�p�s���}) ======
         public ActionResult MojiSpilovi(string format = "", string pretraga = "", string status = "")
         {
             try
@@ -106,7 +106,7 @@ namespace YuGiOhTurniri.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Greska = "Greška pri učitavanju spilova: " + ex.Message;
+                ViewBag.Greska = "Gre?ka pri u?itavanju spilova: " + ex.Message;
                 return View(new List<MojiSpiloviVM>());
             }
         }
@@ -198,10 +198,10 @@ namespace YuGiOhTurniri.Controllers
                 }
             }
 
-            // Ako ima zabranjenih karata, prikaži grešku
+            // Ako ima zabranjenih karata, prika?i gre?ku
             if (karteBanListeUSpilu.Count > 0)
             {
-                ModelState.AddModelError("", "Spil sadrži zabranjene karte sa ban liste: " + string.Join(", ", karteBanListeUSpilu.Distinct()));
+                ModelState.AddModelError("", "Spil sadrzi zabranjene karte sa ban liste: " + string.Join(", ", karteBanListeUSpilu.Distinct()));
                 return View(model);
             }
 
@@ -227,7 +227,7 @@ namespace YuGiOhTurniri.Controllers
                             continue;
                         }
 
-                        // Provjera da li je tip kartе postavljen
+                        // Provjera da li je tip kart�u postavljen
                         if (!string.IsNullOrEmpty(karta.Tip))
                         {
                             mainDeckHasCardType = true;
@@ -246,7 +246,7 @@ namespace YuGiOhTurniri.Controllers
                     }
                 }
 
-                // Ako Main Deck ima karata, mora imati bar jedan tip kartе
+                // Ako Main Deck ima karata, mora imati bar jedan tip kart�u
                 if (mainDeckNazivi.Count > 0 && !mainDeckHasCardType)
                 {
                     greske.Add("Morate odabrati tip (Monster, Spell ili Trap) za barem jednu kartu u Main Deck-u");
@@ -309,7 +309,7 @@ namespace YuGiOhTurniri.Controllers
                 }
             }
 
-            // VALIDACIJA: Provera veličine decka prema YU-GI-OH pravilima
+            // VALIDACIJA: Provera velicine decka prema YU-GI-OH pravilima
             var ogranicenja = new Servisi.OgranicenjaServis();
             int minMain = ogranicenja.DajMinBrojKarataMain();
             int maxMain = ogranicenja.DajMaxBrojKarataMain();
@@ -337,7 +337,7 @@ namespace YuGiOhTurniri.Controllers
                 greske.Add("Main Deck je obavezan i mora imati najmanje 40 karata!");
             }
 
-            // Ako ima greski, prikaži ih
+            // Ako ima greski, prika?i ih
             if (greske.Count > 0)
             {
                 foreach (var greska in greske)
@@ -464,7 +464,7 @@ namespace YuGiOhTurniri.Controllers
 
                 foreach (var karta in karte)
                 {
-                    // Koristi učitanu vrijednost iz baze, ili fallback na heurističko određivanje
+                    // Koristi u?itanu vrijednost iz baze, ili fallback na heuristi?ko odre?ivanje
                     string tipKarte = !string.IsNullOrEmpty(karta.TipKarte) ? karta.TipKarte : DajTipKarte(karta.NazivKarte);
 
                     vm.Karte.Add(new KartaUSpiluVM
@@ -481,15 +481,15 @@ namespace YuGiOhTurniri.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Greska = "Greška pri učitavanju detalja spila: " + ex.Message;
+                ViewBag.Greska = "Gre?ka pri u?itavanju detalja spila: " + ex.Message;
                 return RedirectToAction("MojiSpilovi");
             }
         }
 
-        // Pomoćna metoda za određivanje tipa karte
+        // Pomo?na metoda za odre?ivanje tipa karte
         private string DajTipKarte(string nazivKarte)
         {
-            // Jednostavna logika - u realnom sistemu bi se čitalo iz baze
+            // Jednostavna logika - u realnom sistemu bi se ?italo iz baze
             if (nazivKarte.Contains("Synchro") || nazivKarte.Contains("Xyz") || nazivKarte.Contains("Link"))
                 return "Extra";
             else if (nazivKarte.Contains("[") || nazivKarte.Contains("Effect"))
@@ -542,7 +542,7 @@ namespace YuGiOhTurniri.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Greska = "Greška pri učitavanju spila: " + ex.Message;
+                ViewBag.Greska = "Gre?ka pri ucitavanju spila: " + ex.Message;
                 return RedirectToAction("MojiSpilovi");
             }
         }
@@ -552,7 +552,7 @@ namespace YuGiOhTurniri.Controllers
         {
             try
             {
-                // Prvo učitaj karte iz baze ako nisu prispele
+                // Prvo u?itaj karte iz baze ako nisu prispele
                 if (model.Karte == null || model.Karte.Count == 0)
                 {
                     ISpilRepozitorijum repo = new SpilRepozitorijumSP(_konekcija);
@@ -587,15 +587,15 @@ namespace YuGiOhTurniri.Controllers
                 {
                     string nazivKey = $"naziv_{karta.KartaUSpiluID}";
                     string tipKey = $"tip_{karta.KartaUSpiluID}";
-                    string količinaKey = $"kolicina_{karta.KartaUSpiluID}";
+                    string kolicinaKey = $"kolicina_{karta.KartaUSpiluID}";
 
-                    if (form.AllKeys.Contains(nazivKey) && form.AllKeys.Contains(količinaKey))
+                    if (form.AllKeys.Contains(nazivKey) && form.AllKeys.Contains(kolicinaKey))
                     {
                         string noviNaziv = form[nazivKey];
                         string noviTip = form.AllKeys.Contains(tipKey) ? form[tipKey] : "";
                         int novaKolicina = 0;
 
-                        if (int.TryParse(form[količinaKey], out novaKolicina) && novaKolicina > 0)
+                        if (int.TryParse(form[kolicinaKey], out novaKolicina) && novaKolicina > 0)
                         {
                             izmeneKarata[karta.KartaUSpiluID] = (noviNaziv, novaKolicina, noviTip);
                         }
@@ -629,7 +629,7 @@ namespace YuGiOhTurniri.Controllers
 
                         if (brojDuplikata > 0)
                         {
-                            greske.Add($"Karta '{noviNaziv}' već postoji u spilu!");
+                            greske.Add($"Karta '{noviNaziv}' ve? postoji u spilu!");
                         }
                     }
                 }
@@ -657,7 +657,7 @@ namespace YuGiOhTurniri.Controllers
                     }
                     else
                     {
-                        // Karte koje nisu izmenjene - drži stare vrednosti
+                        // Karte koje nisu izmenjene - dr?i stare vrednosti
                         if (karta.Sekcija == "Main")
                             mainCount += karta.Kolicina;
                         else if (karta.Sekcija == "Extra")
@@ -667,7 +667,7 @@ namespace YuGiOhTurniri.Controllers
                     }
                 }
 
-                // Validacija 4: Proverava veličine decka
+                // Validacija 4: Proverava veli?ine decka
                 var ogranicenja = new Servisi.OgranicenjaServis();
                 int minMain = ogranicenja.DajMinBrojKarataMain();
                 int maxMain = ogranicenja.DajMaxBrojKarataMain();
@@ -689,7 +689,7 @@ namespace YuGiOhTurniri.Controllers
                     greske.Add($"Side Deck sme imati maksimalno {maxSide} karata (trenutno: {sideCount})");
                 }
 
-                // Ako ima grešaka, prikaži ih
+                // Ako ima gre?aka, prika?i ih
                 if (greske.Count > 0)
                 {
                     foreach (var greska in greske)
@@ -702,7 +702,7 @@ namespace YuGiOhTurniri.Controllers
 
                 // ===== IZMENA SPILA =====
 
-                // Ažurira spil metadata
+                // A?urira spil metadata
                 SpilKlasa spil = new SpilKlasa
                 {
                     SpilID = model.SpilID,
@@ -715,12 +715,12 @@ namespace YuGiOhTurniri.Controllers
                 bool uspeh = repozitorijum.Izmeni(spil);
                 if (!uspeh)
                 {
-                    ModelState.AddModelError("", "Greska pri ažuriranju spila!");
+                    ModelState.AddModelError("", "Greska pri azuriranju spila!");
                     model.Formati = new List<string> { "TCG", "OCG", "Speed Duel" };
                     return View(model);
                 }
 
-                // Ažurira karte
+                // A?urira karte
                 foreach (var izmena in izmeneKarata)
                 {
                     repozitorijum.AzurirajKartu(izmena.Key, izmena.Value.naziv, izmena.Value.kolicina, izmena.Value.tip);
@@ -731,7 +731,7 @@ namespace YuGiOhTurniri.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", "Greska pri ažuriranju: " + ex.Message);
+                ModelState.AddModelError("", "Greska pri azuriranju: " + ex.Message);
                 if (model != null)
                 {
                     model.Formati = new List<string> { "TCG", "OCG", "Speed Duel" };
@@ -763,12 +763,12 @@ namespace YuGiOhTurniri.Controllers
 
             TempData["Poruka"] = uspeh
                 ? "Spil obrisan!"
-                : "Greška pri brisanju spila!";
+                : "Greska pri brisanju spila!";
 
             return RedirectToAction("MojiSpilovi");
         }
 
-        // ====== ŠTAMPA SPILA (Parametarska Štampa - Master-Detail) ======
+        // ====== ?TAMPA SPILA (Parametarska ?tampa - Master-Detail) ======
         public ActionResult StampajSpil(int id)
         {
             try
@@ -783,7 +783,7 @@ namespace YuGiOhTurniri.Controllers
                 if (karte == null)
                     karte = new List<KartaUSpiluKlasa>();
 
-                // Dohvati podatke o takmičaru
+                // Dohvati podatke o takmi?aru
                 string takmicarIme = "";
                 if (spil.TakmicarID > 0)
                 {
@@ -797,7 +797,7 @@ namespace YuGiOhTurniri.Controllers
                     catch { }
                 }
 
-                // Generiši HTML štampu sa master-detail podacima
+                // Generi?i HTML ?tampu sa master-detail podacima
                 StampacijuServis stampServis = new StampacijuServis();
                 string htmlStampa = stampServis.GenerirajStampuSpila(spil, karte, takmicarIme);
 
@@ -805,7 +805,7 @@ namespace YuGiOhTurniri.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Greska = "Greška pri generisanju štampe: " + ex.Message;
+                ViewBag.Greska = "Greska pri generisanju stampe: " + ex.Message;
                 return View();
             }
         }
@@ -824,12 +824,12 @@ namespace YuGiOhTurniri.Controllers
                 turniri = turniri.Where(t => t.Status == "Otvoren").ToList();
 
                 List<OtvoreniTurniriVM> vm = new List<OtvoreniTurniriVM>();
-                SPTurnirDBKlasa db = new SPTurnirDBKlasa(_konekcija);
-                SPOrganizatorDBKlasa orgDB = new SPOrganizatorDBKlasa(_konekcija);
+                TurnirDBKlasa db = new TurnirDBKlasa(_konekcija);
+                OrganizatorDBKlasa orgDB = new OrganizatorDBKlasa(_konekcija);
 
                 foreach (var turnir in turniri)
                 {
-                    // Dohvati sve takmičare na turniru
+                    // Dohvati sve takmi?are na turniru
                     DataSet dsTakmicari = db.DajTakmicareNaTurniru(turnir.TurnirID);
                     int brojTakmicara = 0;
                     bool isRegistered = false;
@@ -872,7 +872,7 @@ namespace YuGiOhTurniri.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Greska = "Greška pri učitavanju turnira: " + ex.Message;
+                ViewBag.Greska = "Gre?ka pri u?itavanju turnira: " + ex.Message;
                 return View(new List<OtvoreniTurniriVM>());
             }
         }
@@ -890,11 +890,11 @@ namespace YuGiOhTurniri.Controllers
 
                 if (turnir == null)
                 {
-                    TempData["Greska"] = "Turnir nije pronađen.";
+                    TempData["Greska"] = "Turnir nije prona?en.";
                     return RedirectToAction("OtvoreniTurniri");
                 }
 
-                // Dohvati sve spilove takmičara
+                // Dohvati sve spilove takmi?ara
                 ISpilRepozitorijum spilRepo = new SpilRepozitorijumSP(_konekcija);
                 List<SpilKlasa> spilovi = spilRepo.DajSpiloveTakmicara(takmicarID);
 
@@ -908,10 +908,10 @@ namespace YuGiOhTurniri.Controllers
                     }
                 }
 
-                // Ako nema odobljenih spilova, prikaži grešku
+                // Ako nema odobljenih spilova, prika?i gre?ku
                 if (odgovarajuciSpilovi.Count == 0)
                 {
-                    TempData["Greska"] = "Nemate kreirane spilove u formatu '" + turnir.Format + "' ili svi vaši spilovi su u procesu revizije. Spil mora biti odobren od strane sudije prije nego što se možete prijaviti.";
+                    TempData["Greska"] = "Nemate kreirane spilove u formatu '" + turnir.Format + "' ili svi va?i spilovi su u procesu revizije. Spil mora biti odobren od strane sudije prije nego ?to se mo?ete prijaviti.";
                     return RedirectToAction("OtvoreniTurniri");
                 }
 
@@ -927,7 +927,7 @@ namespace YuGiOhTurniri.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Greska = "Greška pri učitavanju spilova: " + ex.Message;
+                ViewBag.Greska = "Gre?ka pri u?itavanju spilova: " + ex.Message;
                 return RedirectToAction("OtvoreniTurniri");
             }
         }
@@ -946,7 +946,7 @@ namespace YuGiOhTurniri.Controllers
 
                 if (turnir == null)
                 {
-                    TempData["Greska"] = "Turnir nije pronađen.";
+                    TempData["Greska"] = "Turnir nije prona?en.";
                     return RedirectToAction("OtvoreniTurniri");
                 }
 
@@ -956,7 +956,7 @@ namespace YuGiOhTurniri.Controllers
 
                 if (spil == null)
                 {
-                    TempData["Greska"] = "Spil nije pronađen.";
+                    TempData["Greska"] = "Spil nije prona?en.";
                     return RedirectToAction("OtvoreniTurniri");
                 }
 
@@ -970,28 +970,28 @@ namespace YuGiOhTurniri.Controllers
                 // Validacija: Spil mora biti odobren
                 if (spil.Status != "Odobren")
                 {
-                    TempData["Greska"] = "Spil mora biti odobren od strane sudije prije nego što se možete prijaviti.";
+                    TempData["Greska"] = "Spil mora biti odobren od strane sudije prije nego ?to se mo?ete prijaviti.";
                     return RedirectToAction("OtvoreniTurniri");
                 }
 
-                // Dodaj takmičara na turnir sa spilom
-                SPTurnirDBKlasa turnirDB = new SPTurnirDBKlasa(_konekcija);
+                // Dodaj takmi?ara na turnir sa spilom
+                TurnirDBKlasa turnirDB = new TurnirDBKlasa(_konekcija);
                 bool uspeh = turnirDB.DodajTakmicaraTurniru(turnirID, takmicarID, spilID);
 
                 if (uspeh)
                 {
-                    TempData["Poruka"] = $"Uspešno ste se prijavili na turnir '{turnir.Naziv}' sa spilom '{spil.Naziv}'!";
+                    TempData["Poruka"] = $"Uspesno ste se prijavili na turnir '{turnir.Naziv}' sa spilom '{spil.Naziv}'!";
                     return RedirectToAction("OtvoreniTurniri");
                 }
                 else
                 {
-                    TempData["Greska"] = "Već ste registrovani za ovaj turnir ili je došlo do greške!";
+                    TempData["Greska"] = "Vec ste registrovani za ovaj turnir ili je doslo do greske!";
                     return RedirectToAction("OtvoreniTurniri");
                 }
             }
             catch (Exception ex)
             {
-                TempData["Greska"] = "Greška pri prijavi: " + ex.Message;
+                TempData["Greska"] = "Greska pri prijavi: " + ex.Message;
                 return RedirectToAction("OtvoreniTurniri");
             }
         }
@@ -1008,12 +1008,12 @@ namespace YuGiOhTurniri.Controllers
                 turniri = turniri.Where(t => t.Status == "Otvoren").ToList();
 
                 List<OtvoreniTurniriVM> vm = new List<OtvoreniTurniriVM>();
-                SPTurnirDBKlasa db = new SPTurnirDBKlasa(_konekcija);
-                SPOrganizatorDBKlasa orgDB = new SPOrganizatorDBKlasa(_konekcija);
+                TurnirDBKlasa db = new TurnirDBKlasa(_konekcija);
+                OrganizatorDBKlasa orgDB = new OrganizatorDBKlasa(_konekcija);
 
                 foreach (var turnir in turniri)
                 {
-                    // Dohvati sve takmičare na turniru
+                    // Dohvati sve takmi?are na turniru
                     DataSet dsTakmicari = db.DajTakmicareNaTurniru(turnir.TurnirID);
                     int brojTakmicara = 0;
                     bool isRegistered = false;
@@ -1060,7 +1060,7 @@ namespace YuGiOhTurniri.Controllers
             }
         }
 
-        // ====== ZAVRŠENI TURNIRI (Sa Pobjednicima) ======
+        // ====== ZAVR?ENI TURNIRI (Sa Pobjednicima) ======
         public ActionResult ZavrsenTurniri()
         {
             try
@@ -1068,16 +1068,16 @@ namespace YuGiOhTurniri.Controllers
                 ITurnirRepozitorijum repo = new TurnirRepozitorijumSP(_konekcija);
                 List<TurnirKlasa> turniri = repo.DajSveTurnire();
 
-                // Filtriraj samo završene turnire
+                // Filtriraj samo zavr?ene turnire
                 turniri = turniri.Where(t => t.Status == "Zavrsen").ToList();
 
                 List<OtvoreniTurniriVM> vm = new List<OtvoreniTurniriVM>();
-                SPTurnirDBKlasa db = new SPTurnirDBKlasa(_konekcija);
-                SPOrganizatorDBKlasa orgDB = new SPOrganizatorDBKlasa(_konekcija);
+                TurnirDBKlasa db = new TurnirDBKlasa(_konekcija);
+                OrganizatorDBKlasa orgDB = new OrganizatorDBKlasa(_konekcija);
 
                 foreach (var turnir in turniri)
                 {
-                    // Dohvati sve takmičare na turniru
+                    // Dohvati sve takmi?are na turniru
                     DataSet dsTakmicari = db.DajTakmicareNaTurniru(turnir.TurnirID);
                     int brojTakmicara = 0;
 
@@ -1117,7 +1117,7 @@ namespace YuGiOhTurniri.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Greska = "Greška pri učitavanju turnira: " + ex.Message;
+                ViewBag.Greska = "Greska pri ucitavanju turnira: " + ex.Message;
                 return View("OtvoreniTurniri", new List<OtvoreniTurniriVM>());
             }
         }

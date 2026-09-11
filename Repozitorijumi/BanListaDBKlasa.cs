@@ -2,23 +2,21 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using KlasePodataka;
 
-namespace KlasePodataka
+namespace Repozitorijumi
 {
-    public class SPBanListaDBKlasa
+    public class BanListaDBKlasa : BazniRepozitorijum
     {
-        private string _konekcija;
-
-        public SPBanListaDBKlasa(string konekcija)
+        public BanListaDBKlasa(string konekcija) : base(konekcija)
         {
-            _konekcija = konekcija;
         }
 
         public List<BanListaKlasa> DajBanListuSudije(int sudijaID)
         {
             List<BanListaKlasa> lista = new List<BanListaKlasa>();
 
-            using (SqlConnection conn = new SqlConnection(_konekcija))
+            using (SqlConnection conn = DajKonekciju())
             {
                 try
                 {
@@ -36,7 +34,7 @@ namespace KlasePodataka
                                 lista.Add(new BanListaKlasa
                                 {
                                     BanListaID = (int)reader["BannedKartaID"],
-                                    SudijaID = sudijaID, // Za kompatibilnost, koristimo prosle?eni ID
+                                    SudijaID = sudijaID, // Za kompatibilnost, koristimo prosljedjeni ID
                                     NazivKarte = reader["NazivKarte"].ToString(),
                                     DatumDodavanja = (DateTime)reader["DatumBana"]
                                 });
@@ -55,7 +53,7 @@ namespace KlasePodataka
 
         public int DodajNaBanListu(int sudijaID, string nazivKarte)
         {
-            using (SqlConnection conn = new SqlConnection(_konekcija))
+            using (SqlConnection conn = DajKonekciju())
             {
                 try
                 {
@@ -81,7 +79,7 @@ namespace KlasePodataka
 
         public int ObrisiSaBanListe(int banListaID)
         {
-            using (SqlConnection conn = new SqlConnection(_konekcija))
+            using (SqlConnection conn = DajKonekciju())
             {
                 try
                 {
@@ -105,7 +103,7 @@ namespace KlasePodataka
 
         public bool DaLiJeKartaNaBanListi(int sudijaID, string nazivKarte)
         {
-            using (SqlConnection conn = new SqlConnection(_konekcija))
+            using (SqlConnection conn = DajKonekciju())
             {
                 try
                 {

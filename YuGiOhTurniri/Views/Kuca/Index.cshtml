@@ -1,4 +1,4 @@
-﻿@model List<KlasePodataka.TurnirKlasa>
+@model List<KlasePodataka.TurnirKlasa>
 @using System.Linq;
 
 @{
@@ -131,7 +131,7 @@
     <p>Sistem za upravljanje turnirima, spilovima i takmicara</p>
 
     <div class="button-group">
-        <a href="@Url.Action("PrijaviTakmicara", "Account")" class="btn-large btn-takmicar">
+        <a href="@Url.Action("PrijaviTakmicara", "Nalog")" class="btn-large btn-takmicar">
             Prijava Takmicara
         </a>
         <a href="@Url.Action("PrijavaS", "Sudija")" class="btn-large btn-sudija">
@@ -152,7 +152,7 @@
 
     <div class="info-card">
         <h3>Za Sudiju</h3>
-        <p>Pregledajte spilove takmicara, odobravajte ili odbijajte ih, i upravljajte ban listom zabranjenih karata.</p>
+        <p>Prijavite se sa dodelinim kredencijalima, pregledajte spilove takmicara, odobravajte ili odbijajte ih, i upravljajte ban listom zabranjenih karata.</p>
     </div>
 
     <div class="info-card">
@@ -183,7 +183,7 @@
                         </p>
                     </div>
                     <div style="padding: 1rem; display: flex; gap: 0.5rem;">
-                        <a href="@Url.Action("DetaljiTurnira", "Home", new { id = turnir.TurnirID })" class="btn-large" style="background: #667eea; color: white; padding: 0.75rem 1.5rem; font-size: 1rem; flex: 1; margin: 0;">
+                        <a href="@Url.Action("DetaljiTurnira", "Kuca", new { id = turnir.TurnirID })" class="btn-large" style="background: #667eea; color: white; padding: 0.75rem 1.5rem; font-size: 1rem; flex: 1; margin: 0;">
                             Detaljni pregled
                         </a>
                     </div>
@@ -199,7 +199,7 @@ else
     </div>
 }
 
-<!-- ZAVRŠENI TURNIRI SA POBEDNICIMA -->
+<!-- ZAVRSENI TURNIRI SA POBEDNICIMA -->
 @if (Model != null && Model.Where(t => t.Status == "Zavrsen").ToList().Count > 0)
 {
     <div class="turniri-section">
@@ -221,7 +221,7 @@ else
                         </p>
                     </div>
                     <div style="padding: 1rem; display: flex; gap: 0.5rem;">
-                        <a href="@Url.Action("DetaljiTurnira", "Home", new { id = turnir.TurnirID })" class="btn-large" style="background: #48bb78; color: white; padding: 0.75rem 1.5rem; font-size: 1rem; flex: 1; margin: 0;">
+                        <a href="@Url.Action("DetaljiTurnira", "Kuca", new { id = turnir.TurnirID })" class="btn-large" style="background: #48bb78; color: white; padding: 0.75rem 1.5rem; font-size: 1rem; flex: 1; margin: 0;">
                             Vidi Pobednike
                         </a>
                     </div>

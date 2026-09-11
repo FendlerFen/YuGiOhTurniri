@@ -1,0 +1,338 @@
+GitHub link: https://github.com/FendlerFen/YuGiOhTurniri
+
+-- KREIRANJE TABELA
+
+-- 1. TABELA: Takmicari
+CREATE TABLE [dbo].[Takmicari] (
+    [TakmicarID] INT IDENTITY(1,1) PRIMARY KEY,
+    [Ime] NVARCHAR(100) NOT NULL,
+    [Prezime] NVARCHAR(100) NOT NULL,
+    [Email] NVARCHAR(100) NOT NULL UNIQUE,
+    [DatumRodjenja] DATE NOT NULL,
+    [Drzava] NVARCHAR(100) NOT NULL,
+    [Pol] NVARCHAR(50) NOT NULL,
+    [Lozinka] NVARCHAR(100) NOT NULL,
+    [BrojPobeda] INT DEFAULT 0,
+    [DatumRegistracije] DATETIME DEFAULT GETDATE()
+);
+-- 2. TABELA: Organizatori
+CREATE TABLE [dbo].[Organizatori] (
+    [OrganizatorID] INT IDENTITY(1,1) PRIMARY KEY,
+    [NazivOrganizacije] NVARCHAR(200) NOT NULL,
+    [Ime] NVARCHAR(100) NOT NULL,
+    [Prezime] NVARCHAR(100) NOT NULL,
+    [Email] NVARCHAR(100) NOT NULL UNIQUE,
+    [TelefonBroj] NVARCHAR(20),
+    [Drzava] NVARCHAR(100),
+    [Lozinka] NVARCHAR(100) NOT NULL,
+    [DatumRegistracije] DATETIME DEFAULT GETDATE()
+);
+-- 3. TABELA: Sudije
+CREATE TABLE [dbo].[Sudije] (
+    [SudijaID] INT IDENTITY(1,1) PRIMARY KEY,
+    [Ime] NVARCHAR(100) NOT NULL,
+    [Prezime] NVARCHAR(100) NOT NULL,
+    [Email] NVARCHAR(100) NOT NULL UNIQUE,
+    [Lozinka] NVARCHAR(100) NOT NULL,
+    [DatumRegistracije] DATETIME DEFAULT GETDATE()
+);
+-- 4. TABELA: Turniri
+CREATE TABLE [dbo].[Turniri] (
+    [TurnirID] INT IDENTITY(1,1) PRIMARY KEY,
+    [Naziv] NVARCHAR(200) NOT NULL,
+    [Lokacija] NVARCHAR(200) NOT NULL,
+    [Format] NVARCHAR(100) NOT NULL,
+    [DatumOdrzavanja] DATETIME NOT NULL,
+    [OrganizatorID] INT NOT NULL,
+    [Status] NVARCHAR(50) DEFAULT 'Otvoren',
+    [DatumKreiranja] DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY ([OrganizatorID]) REFERENCES [dbo].Organizatori ON DELETE CASCADE
+);
+-- 5. TABELA: Spilovi (Decks)
+CREATE TABLE [dbo].[Spilovi] (
+    [SpilID] INT IDENTITY(1,1) PRIMARY KEY,
+    [Naziv] NVARCHAR(200) NOT NULL,
+    [Format] NVARCHAR(100) NOT NULL,
+    [Arhetip] NVARCHAR(200) NOT NULL,
+    [TakmicarID] INT NOT NULL,
+    [Status] NVARCHAR(50) DEFAULT 'Na cekanju',
+    [NapomenaSudije] NVARCHAR(500),
+    [DatumKreiranja] DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY ([TakmicarID]) REFERENCES [dbo].Takmicari ON DELETE CASCADE
+);
+-- 6. TABELA: KarteUSpilu (Cards in Deck)
+CREATE TABLE [dbo].[KarteUSpilu] (
+    [KartaID] INT IDENTITY(1,1) PRIMARY KEY,
+    [SpilID] INT NOT NULL,
+    [NazivKarte] NVARCHAR(200) NOT NULL,
+    [Sekcija] NVARCHAR(50) NOT NULL,
+    [Kolicina] INT NOT NULL,
+    [TipKarte] NVARCHAR(50),
+    FOREIGN KEY ([SpilID]) REFERENCES [dbo].Spilovi ON DELETE CASCADE
+);
+-- 7. TABELA: Prijave (Tournament Registrations)
+CREATE TABLE [dbo].[Prijave] (
+    [PrijavaID] INT IDENTITY(1,1) PRIMARY KEY,
+    [TurnirID] INT NOT NULL,
+    [TakmicarID] INT NOT NULL,
+    [SpilID] INT NOT NULL,
+    [Status] NVARCHAR(50) DEFAULT 'Aktivna',
+    [DatumPrijave] DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY ([TurnirID]) REFERENCES [dbo].Turniri ON DELETE CASCADE,
+    FOREIGN KEY ([TakmicarID]) REFERENCES [dbo].Takmicari ON DELETE CASCADE,
+    FOREIGN KEY ([SpilID]) REFERENCES [dbo].Spilovi
+);
+-- 8. TABELA: Rezultati (Tournament Results)
+CREATE TABLE [dbo].[Rezultati] (
+    [RezultatID] INT IDENTITY(1,1) PRIMARY KEY,
+    [TurnirID] INT NOT NULL,
+    [TakmicarID] INT NOT NULL,
+    [Mesto] INT NOT NULL,
+    [BrojPoena] INT DEFAULT 0,
+    [DatumRezultata] DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY ([TurnirID]) REFERENCES [dbo].Turniri ON DELETE CASCADE,
+    FOREIGN KEY ([TakmicarID]) REFERENCES [dbo].Takmicari
+);
+-- 9. TABELA: BannedKarte (Banned Cards List)
+CREATE TABLE [dbo].[BannedKarte] (
+    [BannedKartaID] INT IDENTITY(1,1) PRIMARY KEY,
+    [NazivKarte] NVARCHAR(200) NOT NULL UNIQUE,
+    [Razlog] NVARCHAR(500),
+    [DatumBana] DATETIME DEFAULT GETDATE()
+);
+
+-- STORED PROCEDURES
+
+-- 1. SP: Registracija Takmičara
+CREATE PROCEDURE [dbo].[RegistrujTakmicara]
+    @Ime NVARCHAR(100),
+    @Prezime NVARCHAR(100),
+    @Email NVARCHAR(100),
+    @DatumRodjenja DATE,
+    @Drzava NVARCHAR(100),
+    @Pol NVARCHAR(50),
+    @Lozinka NVARCHAR(100),
+    @NoviID INT OUTPUT
+AS
+BEGIN
+    IF EXISTS (SELECT 1 FROM Takmicari WHERE Email = @Email)
+    BEGIN
+        SET @NoviID = -1;
+        RETURN;
+    END
+    INSERT INTO Takmicari (Ime, Prezime, Email, DatumRodjenja, Drzava, Pol, Lozinka)
+    VALUES (@Ime, @Prezime, @Email, @DatumRodjenja, @Drzava, @Pol, @Lozinka);
+    SET @NoviID = CAST(SCOPE_IDENTITY() AS INT);
+END;
+GO
+-- 2. SP: Login Takmičara
+CREATE PROCEDURE [dbo].[LoginTakmicar]
+    @Email NVARCHAR(100),
+    @Lozinka NVARCHAR(100)
+AS
+BEGIN
+    SELECT TakmicarID, Ime, Prezime, Email, DatumRodjenja, Drzava, Pol
+    FROM Takmicari
+    WHERE Email = @Email AND Lozinka = @Lozinka;
+END;
+GO
+-- 3. SP: Registracija Organizatora
+CREATE PROCEDURE [dbo].[RegistrujOrganizatora]
+    @NazivOrganizacije NVARCHAR(200),
+    @Ime NVARCHAR(100),
+    @Prezime NVARCHAR(100),
+    @Email NVARCHAR(100),
+    @TelefonBroj NVARCHAR(20),
+    @Drzava NVARCHAR(100),
+    @Lozinka NVARCHAR(100),
+    @NoviID INT OUTPUT
+AS
+BEGIN
+    IF EXISTS (SELECT 1 FROM Organizatori WHERE Email = @Email)
+    BEGIN
+        SET @NoviID = -1;
+        RETURN;
+    END
+    INSERT INTO Organizatori (NazivOrganizacije, Ime, Prezime, Email, TelefonBroj, Drzava, Lozinka)
+    VALUES (@NazivOrganizacije, @Ime, @Prezime, @Email, @TelefonBroj, @Drzava, @Lozinka);
+    SET @NoviID = CAST(SCOPE_IDENTITY() AS INT);
+END;
+GO
+-- 4. SP: Kreiraj Turnir
+CREATE PROCEDURE [dbo].[KreirajTurnir]
+    @Naziv NVARCHAR(200),
+    @Lokacija NVARCHAR(200),
+    @Format NVARCHAR(100),
+    @DatumOdrzavanja DATETIME,
+    @OrganizatorID INT,
+    @NoviID INT OUTPUT
+AS
+BEGIN
+    INSERT INTO Turniri (Naziv, Lokacija, Format, DatumOdrzavanja, OrganizatorID, Status)
+    VALUES (@Naziv, @Lokacija, @Format, @DatumOdrzavanja, @OrganizatorID, 'Otvoren');
+    SET @NoviID = CAST(SCOPE_IDENTITY() AS INT);
+END;
+GO
+-- 5. SP: Kreiraj Spil
+CREATE PROCEDURE [dbo].[KreirajSpil]
+    @Naziv NVARCHAR(200),
+    @Format NVARCHAR(100),
+    @Arhetip NVARCHAR(200),
+    @TakmicarID INT,
+    @NoviID INT OUTPUT
+AS
+BEGIN
+    INSERT INTO Spilovi (Naziv, Format, Arhetip, TakmicarID, Status)
+    VALUES (@Naziv, @Format, @Arhetip, @TakmicarID, 'Na cekanju');
+    SET @NoviID = CAST(SCOPE_IDENTITY() AS INT);
+END;
+GO
+-- 6. SP: Dodaj Kartu u Spil
+CREATE PROCEDURE [dbo].[DodajKartuUSpil]
+    @SpilID INT,
+    @NazivKarte NVARCHAR(200),
+    @Sekcija NVARCHAR(50),
+    @Kolicina INT,
+    @TipKarte NVARCHAR(50) = NULL
+AS
+BEGIN
+    INSERT INTO KarteUSpilu (SpilID, NazivKarte, Sekcija, Kolicina, TipKarte)
+    VALUES (@SpilID, @NazivKarte, @Sekcija, @Kolicina, @TipKarte);
+END;
+GO
+-- 7. SP: Dodaj Takmičara u Turnir
+CREATE PROCEDURE [dbo].[DodajTakmicaraTurniru]
+    @TurnirID INT,
+    @TakmicarID INT,
+    @SpilID INT,
+    @Uspeh BIT OUTPUT
+AS
+BEGIN
+    IF EXISTS (SELECT 1 FROM Prijave WHERE TurnirID = @TurnirID AND TakmicarID = @TakmicarID)
+    BEGIN
+        SET @Uspeh = 0;
+        RETURN;
+    END
+    INSERT INTO Prijave (TurnirID, TakmicarID, SpilID, Status)
+    VALUES (@TurnirID, @TakmicarID, @SpilID, 'Aktivna');
+    SET @Uspeh = 1;
+END;
+GO
+-- 8. SP: Promeni Status Spila
+CREATE PROCEDURE [dbo].[PromeniStatusSpila]
+    @SpilID INT,
+    @NoviStatus NVARCHAR(50),
+    @Napomena NVARCHAR(500) = ''
+AS
+BEGIN
+    UPDATE Spilovi
+    SET Status = @NoviStatus,
+        NapomenaSudije = CASE WHEN @Napomena != '' THEN @Napomena ELSE NapomenaSudije END
+    WHERE SpilID = @SpilID;
+END;
+GO
+-- 9. SP: Završi Turnir
+CREATE PROCEDURE [dbo].[ZavrsiTurnir]
+    @TurnirID INT
+AS
+BEGIN
+    UPDATE Turniri
+    SET Status = 'Zavrsen'
+    WHERE TurnirID = @TurnirID;
+END;
+GO
+-- 10. SP: Proglasi Pobednike
+CREATE PROCEDURE [dbo].[ProglasiPobednike]
+    @TurnirID INT,
+    @PrvoMestoID INT,
+    @DrugoMestoID INT,
+    @TreceMestoID INT
+AS
+BEGIN
+    DELETE FROM Rezultati WHERE TurnirID = @TurnirID;
+    INSERT INTO Rezultati (TurnirID, TakmicarID, Mesto, BrojPoena)
+    VALUES
+        (@TurnirID, @PrvoMestoID, 1, 3),
+        (@TurnirID, @DrugoMestoID, 2, 2),
+        (@TurnirID, @TreceMestoID, 3, 1);
+    UPDATE Takmicari SET BrojPobeda = BrojPobeda + 3 WHERE TakmicarID = @PrvoMestoID;
+    UPDATE Takmicari SET BrojPobeda = BrojPobeda + 2 WHERE TakmicarID = @DrugoMestoID;
+    UPDATE Takmicari SET BrojPobeda = BrojPobeda + 1 WHERE TakmicarID = @TreceMestoID;
+END;
+GO
+-- 11. SP: Registracija Sudije
+CREATE PROCEDURE [dbo].[RegistrujSudiju]
+    @Ime NVARCHAR(100),
+    @Prezime NVARCHAR(100),
+    @Email NVARCHAR(100),
+    @Lozinka NVARCHAR(100)
+AS
+BEGIN
+    IF EXISTS (SELECT 1 FROM Sudije WHERE Email = @Email)
+    BEGIN
+        RETURN;
+    END
+    INSERT INTO Sudije (Ime, Prezime, Email, Lozinka)
+    VALUES (@Ime, @Prezime, @Email, @Lozinka);
+END;
+GO
+-- 12. SP: Daj sve Takmičare na Turniru
+CREATE PROCEDURE [dbo].[DajTakmicareNaTurniru]
+    @TurnirID INT
+AS
+BEGIN
+    SELECT
+        t.TakmicarID,
+        t.Ime,
+        t.Prezime,
+        t.Email,
+        p.SpilID,
+        s.Naziv AS SpilNaziv,
+        s.Format,
+        s.Status,
+        p.Status AS StatusPrijave
+    FROM Prijave p
+    INNER JOIN Takmicari t ON p.TakmicarID = t.TakmicarID
+    INNER JOIN Spilovi s ON p.SpilID = s.SpilID
+    WHERE p.TurnirID = @TurnirID;
+END;
+GO
+-- 13. SP: Daj Pobednike Turnira
+CREATE PROCEDURE [dbo].[DajPobednikeTurnira]
+    @TurnirID INT
+AS
+BEGIN
+    SELECT
+        r.RezultatID,
+        r.TakmicarID,
+        t.Ime,
+        t.Prezime,
+        r.Mesto,
+        r.BrojPoena
+    FROM Rezultati r
+    INNER JOIN Takmicari t ON r.TakmicarID = t.TakmicarID
+    WHERE r.TurnirID = @TurnirID
+    ORDER BY r.Mesto;
+END;
+GO
+-- 14. SP: Dodaj Kartu na Ban Listu
+CREATE PROCEDURE [dbo].[DodajNaBanListu]
+    @NazivKarte NVARCHAR(200),
+    @Razlog NVARCHAR(500)
+AS
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM BannedKarte WHERE NazivKarte = @NazivKarte)
+    BEGIN
+        INSERT INTO BannedKarte (NazivKarte, Razlog)
+        VALUES (@NazivKarte, @Razlog);
+    END
+END;
+GO
+-- 15. SP: Obrisi Kartu sa Ban Liste
+CREATE PROCEDURE [dbo].[ObrisiSaBanListe]
+    @BannedKartaID INT
+AS
+BEGIN
+    DELETE FROM BannedKarte WHERE BannedKartaID = @BannedKartaID;
+END;
+GO

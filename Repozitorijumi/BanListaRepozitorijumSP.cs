@@ -15,31 +15,31 @@ namespace Repozitorijumi
 
         public List<BanListaKlasa> DajBanListuSudije(int sudijaID)
         {
-            SPBanListaDBKlasa db = new SPBanListaDBKlasa(_konekcija);
+            BanListaDBKlasa db = new BanListaDBKlasa(_konekcija);
             return db.DajBanListuSudije(sudijaID);
         }
 
         public List<BanListaKlasa> DajSvuBanListu()
         {
-            SPBanListaDBKlasa db = new SPBanListaDBKlasa(_konekcija);
+            BanListaDBKlasa db = new BanListaDBKlasa(_konekcija);
             return db.DajBanListuSudije(0);
         }
 
         public int DodajNaBanListu(int sudijaID, string nazivKarte)
         {
-            SPBanListaDBKlasa db = new SPBanListaDBKlasa(_konekcija);
+            BanListaDBKlasa db = new BanListaDBKlasa(_konekcija);
             return db.DodajNaBanListu(sudijaID, nazivKarte);
         }
 
         public int ObrisiSaBanListe(int banListaID)
         {
-            SPBanListaDBKlasa db = new SPBanListaDBKlasa(_konekcija);
+            BanListaDBKlasa db = new BanListaDBKlasa(_konekcija);
             return db.ObrisiSaBanListe(banListaID);
         }
 
         public bool DaLiJeKartaNaBanListi(int sudijaID, string nazivKarte)
         {
-            SPBanListaDBKlasa db = new SPBanListaDBKlasa(_konekcija);
+            BanListaDBKlasa db = new BanListaDBKlasa(_konekcija);
             return db.DaLiJeKartaNaBanListi(sudijaID, nazivKarte);
         }
     }

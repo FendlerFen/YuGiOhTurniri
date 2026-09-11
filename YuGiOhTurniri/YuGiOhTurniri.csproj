@@ -48,7 +48,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Prezentaciona Logika\Prezentaciona Logika.csproj">
       <Project>{B328377A-4DCF-430C-88A7-1644E01D3CA4}</Project>
-      <Name>PrezentacionaLogika</Name>
+      <Name>Prezentaciona Logika</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -176,10 +176,13 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
-    <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\KucaController.cs" />
+    <Compile Include="Controllers\NalogController.cs" />
+    <!-- Removed Doma?a Controller -->
+    <!-- Removed Nalog Controller -->
     <Compile Include="Controllers\OrganizatorController.cs" />
-    <Compile Include="Controllers\ServisController.cs" />
-    <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\RestApiController.cs" />
+    <!-- Removed Doma?a Controller -->
     <Compile Include="Controllers\SudijaController.cs" />
     <Compile Include="Controllers\TakmicarController.cs" />
     <Compile Include="Global.asax.cs">
@@ -266,8 +269,6 @@
     <Content Include="Views\Takmicar\DetaljiSpila.cshtml" />
     <Content Include="Views\Takmicar\KreirajSpil.cshtml" />
     <Content Include="Views\Takmi?ar\StampajSpil.cshtml" />
-    <Content Include="Views\Account\PrijaviTakmicara.cshtml" />
-    <Content Include="Views\Account\RegistrujTakmicara.cshtml" />
     <Content Include="Views\Takmi?ar\OtvoreniTurniri.cshtml" />
     <Content Include="Views\Organizator\MojiTurniri.cshtml" />
     <Content Include="Views\Sudija\SpiloveNaCekanju.cshtml" />
@@ -285,18 +286,19 @@
     <Content Include="Views\Sudija\Dashboard.cshtml" />
     <Content Include="Views\Takmicar\IzmeniSpil.cshtml" />
     <Content Include="Views\Organizator\PrijaviOrganizatora.cshtml" />
-    <Content Include="Views\Organizator\RegistrujOrganizatora.cshtml" />
     <Content Include="Views\Organizator\Kontrolna.cshtml" />
     <Content Include="Views\Sudija\BanLista.cshtml" />
-    <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Takmicar\OdaberiSpilZaTurnir.cshtml" />
     <Content Include="Views\Organizator\IzmeniTurnir.cshtml" />
-    <Content Include="Views\Account\RegistrujSudiju.cshtml" />
     <Content Include="Views\Organizator\ProglasiPobednike.cshtml" />
     <Content Include="Views\Takmicar\Index.cshtml" />
     <Content Include="Views\Takmicar\BanLista.cshtml" />
     <Content Include="Views\Takmicar\PrijaviSeTurnir.cshtml" />
     <Content Include="Views\Organizator\KreirajTurnir.cshtml" />
+    <Content Include="Views\Nalog\PrijaviTakmicara.cshtml" />
+    <Content Include="Views\Kuca\Index.cshtml" />
+    <Content Include="Views\Nalog\RegistrujTakmicara.cshtml" />
+    <Content Include="Views\Organizator\RegistrujOrganizatora.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -315,6 +317,7 @@
     <Folder Include="bin\roslyn\" />
     <Folder Include="CSS\" />
     <Folder Include="SQL\" />
+    <Folder Include="Views\Account\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Prezentaciona Logika\Prezentaciona Logika.csproj">

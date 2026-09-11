@@ -21,19 +21,19 @@ namespace Repozitorijumi
 
         public int Dodaj(OrganizatorKlasa organizator)
         {
-            SPOrganizatorDBKlasa db = new SPOrganizatorDBKlasa(_konekcija);
+            OrganizatorDBKlasa db = new OrganizatorDBKlasa(_konekcija);
             return db.Registruj(organizator);
         }
 
         public OrganizatorKlasa DajPoID(int organizatorID)
         {
-            SPOrganizatorDBKlasa db = new SPOrganizatorDBKlasa(_konekcija);
+            OrganizatorDBKlasa db = new OrganizatorDBKlasa(_konekcija);
             return db.DajPoID(organizatorID);
         }
 
         public OrganizatorKlasa Login(string email, string lozinka)
         {
-            SPOrganizatorDBKlasa db = new SPOrganizatorDBKlasa(_konekcija);
+            OrganizatorDBKlasa db = new OrganizatorDBKlasa(_konekcija);
             return db.Login(email, lozinka);
         }
     }

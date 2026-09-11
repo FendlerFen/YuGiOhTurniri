@@ -1,17 +1,14 @@
 using System;
-using System;
 using System.Data;
 using System.Data.SqlClient;
+using KlasePodataka;
 
-namespace KlasePodataka
+namespace Repozitorijumi
 {
-    public class SPSudijaDBKlasa
+    public class SudijaDBKlasa : BazniRepozitorijum
     {
-        private string _stringKonekcije;
-
-        public SPSudijaDBKlasa(string noviStringKonekcije)
+        public SudijaDBKlasa(string noviStringKonekcije) : base(noviStringKonekcije)
         {
-            _stringKonekcije = noviStringKonekcije;
         }
 
         // PRIJAVA SUDIJE - Koristi bazu umesto hardkoda
@@ -19,11 +16,11 @@ namespace KlasePodataka
         {
             try
             {
-                using (SqlConnection konekcija = new SqlConnection(_stringKonekcije))
+                using (SqlConnection konekcija = DajKonekciju())
                 {
                     konekcija.Open();
 
-                    // Prvo poku?aj sa email i lozinkom (novi pristup)
+                    // Prvo pokusaj sa email i lozinkom (novi pristup)
                     string sql = "SELECT SudijaID FROM Sudije WHERE Email = @Email AND Lozinka = @Lozinka";
                     using (SqlCommand komanda = new SqlCommand(sql, konekcija))
                     {
@@ -40,10 +37,9 @@ namespace KlasePodataka
             }
             catch (Exception ex)
             {
-                // Gre?ka pri prijavi
+                // Log error
             }
 
-            // Ako ne na?e sa email, vrati 0 (neuspe?na prijava)
             return 0;
         }
 
@@ -52,7 +48,7 @@ namespace KlasePodataka
         {
             try
             {
-                using (SqlConnection konekcija = new SqlConnection(_stringKonekcije))
+                using (SqlConnection konekcija = DajKonekciju())
                 {
                     konekcija.Open();
                     string sql = "SELECT SudijaID, Ime, Prezime, Email, Lozinka, DatumRegistracije FROM Sudije WHERE SudijaID = @ID";
@@ -91,7 +87,7 @@ namespace KlasePodataka
         {
             try
             {
-                using (SqlConnection konekcija = new SqlConnection(_stringKonekcije))
+                using (SqlConnection konekcija = DajKonekciju())
                 {
                     konekcija.Open();
                     string sql = "SELECT SudijaID, Ime, Prezime, Email, Lozinka, DatumRegistracije FROM Sudije WHERE Email = @Email";
@@ -131,7 +127,7 @@ namespace KlasePodataka
         {
             try
             {
-                using (SqlConnection konekcija = new SqlConnection(_stringKonekcije))
+                using (SqlConnection konekcija = DajKonekciju())
                 {
                     konekcija.Open();
 
@@ -162,7 +158,7 @@ namespace KlasePodataka
             DataSet ds = new DataSet();
             try
             {
-                using (SqlConnection konekcija = new SqlConnection(_stringKonekcije))
+                using (SqlConnection konekcija = DajKonekciju())
                 {
                     konekcija.Open();
                     string sql = "SELECT SudijaID, Ime, Prezime, Email, Lozinka, DatumRegistracije FROM Sudije ORDER BY Ime, Prezime";
@@ -176,7 +172,7 @@ namespace KlasePodataka
             }
             catch (Exception ex)
             {
-                // Gre?ka pri u?itavanju sudija
+                // Greska pri ucitavanju sudija
             }
 
             return ds;
@@ -187,7 +183,7 @@ namespace KlasePodataka
         {
             try
             {
-                using (SqlConnection konekcija = new SqlConnection(_stringKonekcije))
+                using (SqlConnection konekcija = DajKonekciju())
                 {
                     konekcija.Open();
                     string sql = "DELETE FROM Sudije WHERE SudijaID = @ID";

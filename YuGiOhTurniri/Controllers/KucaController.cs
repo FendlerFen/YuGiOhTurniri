@@ -1,16 +1,13 @@
-﻿using System;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using KlasePodataka;
 using Repozitorijumi;
 
 namespace YuGiOhTurniri.Controllers
 {
-    public class HomeController : Controller
+    public class KucaController : Controller
     {
         private readonly string _konekcija = ConfigurationManager.ConnectionStrings["Konekcija"].ConnectionString;
 
@@ -33,7 +30,6 @@ namespace YuGiOhTurniri.Controllers
 
             try
             {
-                // Prikazuj sve turnire za neprijavljene korisnike
                 ITurnirRepozitorijum repo = new TurnirRepozitorijumSP(_konekcija);
                 List<TurnirKlasa> turniri = repo.DajSveTurnire();
                 return View(turniri);
@@ -58,14 +54,12 @@ namespace YuGiOhTurniri.Controllers
 
             ViewBag.Pobednici = repo.DajRezultate(id.Value);
 
-            // Učitaj takmičare na turniru
-            SPTurnirDBKlasa turnirDB = new SPTurnirDBKlasa(_konekcija);
+            TurnirDBKlasa turnirDB = new TurnirDBKlasa(_konekcija);
             var dsTakmicari = turnirDB.DajTakmicareNaTurniru(turnir.TurnirID);
 
             ViewBag.Takmicari = dsTakmicari.Tables.Count > 0 ? dsTakmicari.Tables[0] : new System.Data.DataTable();
             ViewBag.BrojTakmicara = dsTakmicari.Tables.Count > 0 ? dsTakmicari.Tables[0].Rows.Count : 0;
 
-            // Ako je neulogovan korisnik, prikaži samo informacije (bez dugmadi za uređivanje)
             if (Session["organizatorID"] == null)
             {
                 ViewBag.IsPublicView = true;
@@ -76,7 +70,7 @@ namespace YuGiOhTurniri.Controllers
 
         public ActionResult About()
         {
-            ViewBag.Message = "O Yu-Gi-Oh! Turnirima";
+            ViewBag.Message = "O Yu-Gi-Oh! Turnirijima";
             return View();
         }
 

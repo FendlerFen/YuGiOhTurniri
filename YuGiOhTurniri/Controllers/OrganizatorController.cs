@@ -1,4 +1,4 @@
-﻿using System.Web.Mvc;
+using System.Web.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -36,7 +36,7 @@ namespace YuGiOhTurniri.Controllers
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors);
                 string errorMessage = string.Join("; ", errors.Select(e => e.ErrorMessage));
-                ViewBag.Greska = "Greške pri validaciji: " + errorMessage;
+                ViewBag.Greska = "Gre?ke pri validaciji: " + errorMessage;
                 return View(model);
             }
 
@@ -49,7 +49,7 @@ namespace YuGiOhTurniri.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Greska = "Greška pri prijavi: " + ex.Message;
+                ViewBag.Greska = "Gre?ka pri prijavi: " + ex.Message;
                 return View(model);
             }
 
@@ -64,7 +64,7 @@ namespace YuGiOhTurniri.Controllers
                 return RedirectToAction("Kontrolna", "Organizator");
             }
 
-            ViewBag.Greska = "Pogrešan email ili lozinka!";
+            ViewBag.Greska = "Pogre?an email ili lozinka!";
             return View(model);
         }
 
@@ -124,7 +124,7 @@ namespace YuGiOhTurniri.Controllers
             return View();
         }
 
-        // ====== TURNIRI (sa filterima i pretrагом) ======
+        // ====== TURNIRI (sa filterima i pretr�p�s���}) ======
         public ActionResult MojiTurniri(string format = "", string pretraga = "")
         {
             if (Session["organizatorID"] == null)
@@ -135,7 +135,7 @@ namespace YuGiOhTurniri.Controllers
                 int organizatorID = Convert.ToInt32(Session["organizatorID"]);
                 System.Diagnostics.Debug.WriteLine($"MojiTurniri: organizatorID={organizatorID}");
 
-                SPTurnirDBKlasa db = new SPTurnirDBKlasa(_konekcija);
+                TurnirDBKlasa db = new TurnirDBKlasa(_konekcija);
                 var ds = db.DajTurnireOrganizatora(organizatorID);
 
                 System.Diagnostics.Debug.WriteLine($"MojiTurniri: Broj tabela = {ds.Tables.Count}");
@@ -235,10 +235,10 @@ namespace YuGiOhTurniri.Controllers
             if (Session["organizatorID"] == null)
                 return RedirectToAction("PrijaviOrganizatora");
 
-            // Validacija datuma - mora biti u budućnosti
+            // Validacija datuma - mora biti u budu?nosti
             if (model.DatumOdrzavanja < DateTime.Today)
             {
-                ModelState.AddModelError("DatumOdrzavanja", "Datum turnira mora biti u budućnosti!");
+                ModelState.AddModelError("DatumOdrzavanja", "Datum turnira mora biti u budu?nosti!");
             }
 
             if (!ModelState.IsValid)
@@ -267,7 +267,7 @@ namespace YuGiOhTurniri.Controllers
                     DatumKreiranja = DateTime.Now
                 };
 
-                SPTurnirDBKlasa db = new SPTurnirDBKlasa(_konekcija);
+                TurnirDBKlasa db = new TurnirDBKlasa(_konekcija);
                 int noviTurnirID = db.KreirajTurnir(turnir);
 
                 if (noviTurnirID > 0)
@@ -302,7 +302,7 @@ namespace YuGiOhTurniri.Controllers
 
             try
             {
-                SPTurnirDBKlasa db = new SPTurnirDBKlasa(_konekcija);
+                TurnirDBKlasa db = new TurnirDBKlasa(_konekcija);
                 DataRow row = db.DajTurnirPoID(id);
 
                 if (row == null)
@@ -377,7 +377,7 @@ namespace YuGiOhTurniri.Controllers
 
             try
             {
-                SPTurnirDBKlasa db = new SPTurnirDBKlasa(_konekcija);
+                TurnirDBKlasa db = new TurnirDBKlasa(_konekcija);
                 DataRow row = db.DajTurnirPoID(id);
 
                 if (row == null)
@@ -440,7 +440,7 @@ namespace YuGiOhTurniri.Controllers
                     OrganizatorID = Convert.ToInt32(Session["organizatorID"])
                 };
 
-                SPTurnirDBKlasa db = new SPTurnirDBKlasa(_konekcija);
+                TurnirDBKlasa db = new TurnirDBKlasa(_konekcija);
 
                 // Obrisi sve prijave na turnir kada se turnir izmeni
                 db.ObrisiBrisanjePrijava(id);
@@ -471,7 +471,7 @@ namespace YuGiOhTurniri.Controllers
 
             try
             {
-                SPTurnirDBKlasa db = new SPTurnirDBKlasa(_konekcija);
+                TurnirDBKlasa db = new TurnirDBKlasa(_konekcija);
                 bool uspeh = db.ObrisiTurnir(id);
 
                 if (uspeh)
@@ -498,7 +498,7 @@ namespace YuGiOhTurniri.Controllers
 
             try
             {
-                SPTurnirDBKlasa db = new SPTurnirDBKlasa(_konekcija);
+                TurnirDBKlasa db = new TurnirDBKlasa(_konekcija);
 
                 // Dohvati sve takmicare koji su se prijavili na turnir
                 DataSet dsTakmicari = db.DajTakmicareNaTurniru(id);
@@ -545,7 +545,7 @@ namespace YuGiOhTurniri.Controllers
 
             try
             {
-                SPTurnirDBKlasa db = new SPTurnirDBKlasa(_konekcija);
+                TurnirDBKlasa db = new TurnirDBKlasa(_konekcija);
                 bool uspeh = db.ProglasiPobednike(id, model.PrvoMestoID, model.DrugoMestoID, model.TreceMestoID);
 
                 if (uspeh)
@@ -566,7 +566,7 @@ namespace YuGiOhTurniri.Controllers
             }
         }
 
-        // ====== ŠTAMPA TURNIRA (Parametarska Štampa - Master-Detail) ======
+        // ====== ?TAMPA TURNIRA (Parametarska ?tampa - Master-Detail) ======
         public ActionResult StampajTurnir(int id)
         {
             if (Session["organizatorID"] == null)
@@ -574,12 +574,12 @@ namespace YuGiOhTurniri.Controllers
 
             try
             {
-                SPTurnirDBKlasa db = new SPTurnirDBKlasa(_konekcija);
+                TurnirDBKlasa db = new TurnirDBKlasa(_konekcija);
                 DataRow row = db.DajTurnirPoID(id);
 
                 if (row == null)
                 {
-                    TempData["Greska"] = "Turnir nije pronađen!";
+                    TempData["Greska"] = "Turnir nije prona?en!";
                     return RedirectToAction("MojiTurniri");
                 }
 
@@ -595,7 +595,7 @@ namespace YuGiOhTurniri.Controllers
                     DatumKreiranja = (DateTime)row["DatumKreiranja"]
                 };
 
-                // Dohvati sve takmičare koji su se prijavili na turnir
+                // Dohvati sve takmi?are koji su se prijavili na turnir
                 var dsTakmicari = db.DajTakmicareNaTurniru(id);
                 List<string> takmicari = new List<string>();
                 if (dsTakmicari.Tables.Count > 0 && dsTakmicari.Tables[0].Rows.Count > 0)
@@ -622,7 +622,7 @@ namespace YuGiOhTurniri.Controllers
                     }
                 }
 
-                // Generiši HTML štampu sa master-detail podacima
+                // Generi?i HTML ?tampu sa master-detail podacima
                 StampacijuServis stampServis = new StampacijuServis();
                 string htmlStampa = stampServis.GenerirajStampuTurnira(turnir, takmicari, rezultati);
 
@@ -630,7 +630,7 @@ namespace YuGiOhTurniri.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Greska"] = "Greška pri generisanju štampe: " + ex.Message;
+                TempData["Greska"] = "Gre?ka pri generisanju ?tampe: " + ex.Message;
                 return RedirectToAction("MojiTurniri");
             }
         }
@@ -638,7 +638,7 @@ namespace YuGiOhTurniri.Controllers
         public ActionResult Logout()
         {
             Session.Clear();
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Kuca");
         }
     }
 }

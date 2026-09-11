@@ -12,11 +12,11 @@
         @if (ViewBag.Greska != null)
         {
             <div class="alert alert-danger">
-                <strong>Gre?ka:</strong> @ViewBag.Greska
+                <strong>Greska:</strong> @ViewBag.Greska
             </div>
         }
 
-        @using (Html.BeginForm("PrijaviTakmicara", "Account", FormMethod.Post, new { @class = "form-validation", id = "loginForm" }))
+        @using (Html.BeginForm("PrijaviTakmicara", "Nalog", FormMethod.Post, new { @class = "form-validation", id = "loginForm" }))
         {
 
             <div class="form-group">
@@ -35,7 +35,7 @@
         }
 
         <div class="auth-link">
-            Nemate nalog? <a href="@Url.Action("RegistrujTakmicara", "Account")">Registrujte se</a>
+            Nemate nalog? <a href="@Url.Action("RegistrujTakmicara", "Nalog")">Registrujte se</a>
         </div>
     </div>
 </div>
