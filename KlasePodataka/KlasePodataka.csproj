@@ -90,12 +90,6 @@
     <Compile Include="OrganizatorKlasa.cs" />
     <Compile Include="PrijavaKlasa.cs" />
     <Compile Include="RezultatKlasa.cs" />
-    <Compile Include="SPBanListaDBKlasa.cs" />
-    <Compile Include="SPOrganizatorDBKlasa.cs" />
-    <Compile Include="SPSpilDBKlasa.cs" />
-    <Compile Include="SPSudijaDBKlasa.cs" />
-    <Compile Include="SPTakmicarDBKlasa.cs" />
-    <Compile Include="SPTurnirDBKlasa.cs" />
     <Compile Include="SudijaKlasa.cs" />
     <Compile Include="TurnirKlasa.cs" />
     <Compile Include="KartaKlasa.cs" />

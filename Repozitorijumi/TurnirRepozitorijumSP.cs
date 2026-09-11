@@ -16,14 +16,14 @@ namespace Repozitorijumi
 
         public List<TurnirKlasa> DajSveTurnire()
         {
-            var db = new SPTurnirDBKlasa(_konekcija);
+            var db = new TurnirDBKlasa(_konekcija);
             var ds = db.DajSveTurnire();
             return MapirajDataSet(ds);
         }
 
         public TurnirKlasa DajPoID(int id)
         {
-            var db = new SPTurnirDBKlasa(_konekcija);
+            var db = new TurnirDBKlasa(_konekcija);
             var row = db.DajTurnirPoID(id);
 
             if (row == null)
@@ -49,45 +49,45 @@ namespace Repozitorijumi
 
         public List<TurnirKlasa> DajOtvoreneTurnire()
         {
-            var db = new SPTurnirDBKlasa(_konekcija);
+            var db = new TurnirDBKlasa(_konekcija);
             var ds = db.DajOtvoreneTurnire();
             return MapirajDataSet(ds);
         }
 
         public List<TurnirKlasa> DajTurnireOrganizatora(int organizatorID)
         {
-            var db = new SPTurnirDBKlasa(_konekcija);
+            var db = new TurnirDBKlasa(_konekcija);
             var ds = db.DajTurnireOrganizatora(organizatorID);
             return MapirajDataSet(ds);
         }
 
         public int Dodaj(TurnirKlasa turnir)
         {
-            var db = new SPTurnirDBKlasa(_konekcija);
+            var db = new TurnirDBKlasa(_konekcija);
             return db.KreirajTurnir(turnir);
         }
 
         public bool Izmeni(TurnirKlasa turnir)
         {
-            var db = new SPTurnirDBKlasa(_konekcija);
+            var db = new TurnirDBKlasa(_konekcija);
             return db.IzmeniTurnir(turnir);
         }
 
         public bool ZavrsiTurnir(int id)
         {
-            var db = new SPTurnirDBKlasa(_konekcija);
+            var db = new TurnirDBKlasa(_konekcija);
             return db.ZavrsiTurnir(id);
         }
 
         public bool ProclasiPobjednike(int turnirID, int prvoMestoID, int drugoMestoID, int treceMestoID)
         {
-            var db = new SPTurnirDBKlasa(_konekcija);
+            var db = new TurnirDBKlasa(_konekcija);
             return db.ProglasiPobednike(turnirID, prvoMestoID, drugoMestoID, treceMestoID);
         }
 
         public List<RezultatKlasa> DajRezultate(int turnirID)
         {
-            var db = new SPTurnirDBKlasa(_konekcija);
+            var db = new TurnirDBKlasa(_konekcija);
             var ds = db.DajPobednike(turnirID);
 
             List<RezultatKlasa> rezultati = new List<RezultatKlasa>();

@@ -62,7 +62,7 @@ namespace YuGiOhTurniri.Controllers
                 }
 
                 // Ako ne poklapa hardcoded kredencijale, poku?aj iz baze
-                SPSudijaDBKlasa db = new SPSudijaDBKlasa(_konekcija);
+                SudijaDBKlasa db = new SudijaDBKlasa(_konekcija);
                 int sudijaID = db.PrijavaS(email, lozinka);
 
                 if (sudijaID > 0)
@@ -206,7 +206,7 @@ namespace YuGiOhTurniri.Controllers
                 {
                     try
                     {
-                        SPTakmicarDBKlasa takmicariDB = new SPTakmicarDBKlasa(_konekcija);
+                        TakmicarDBKlasa takmicariDB = new TakmicarDBKlasa(_konekcija);
                         DataRow takmicariRow = takmicariDB.DajTakmicaraPoID(spil.TakmicarID);
 
                         if (takmicariRow != null)

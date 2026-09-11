@@ -18,7 +18,7 @@
                 <div style="display: flex; gap: 2rem;">
                     @if (Session["takmicarID"] == null && Session["organizatorID"] == null && Session["sudijaID"] == null)
                     {
-                        <a href="@Url.Action("Index", "Home")" class="nav-link">Pocetna</a>
+                        <a href="@Url.Action("Index", "Kuca")" class="nav-link">Pocetna</a>
                     }
 
                     @if (Session["takmicarID"] != null)
@@ -27,7 +27,7 @@
                         <a href="@Url.Action("MojiSpilovi", "Takmicar")" class="nav-link">Moji Spilovi</a>
                         <a href="@Url.Action("OtvoreniTurniri", "Takmicar")" class="nav-link">Prijave</a>
                         <a href="@Url.Action("BanLista", "Takmicar")" class="nav-link">Ban Lista</a>
-                        <a href="@Url.Action("Logout", "Account")" class="nav-link">Odjava</a>
+                        <a href="@Url.Action("Logout", "Nalog")" class="nav-link">Odjava</a>
                         <span class="navbar-user">@Session["ime"] @Session["prezime"]</span>
                     }
                     else if (Session["organizatorID"] != null)
@@ -35,7 +35,7 @@
                         <a href="@Url.Action("Kontrolna", "Organizator")" class="nav-link">Pocetna</a>
                         <a href="@Url.Action("MojiTurniri", "Organizator")" class="nav-link">Moji Turniri</a>
                         <a href="@Url.Action("KreirajTurnir", "Organizator")" class="nav-link">Novi Turnir</a>
-                        <a href="@Url.Action("Logout", "Organizator")" class="nav-link">Odjava</a>
+                        <a href="@Url.Action("Logout", "Nalog")" class="nav-link">Odjava</a>
                         <span class="navbar-user">@Session["organizatorIme"] @Session["organizatorPrezime"]</span>
                     }
                     else if (Session["sudijaID"] != null)
@@ -48,7 +48,7 @@
                     }
                     else
                     {
-                        <a href="@Url.Action("PrijaviTakmicara", "Account")" class="nav-link">Takmicara</a>
+                        <a href="@Url.Action("PrijaviTakmicara", "Nalog")" class="nav-link">Takmicara</a>
                         <a href="@Url.Action("PrijaviOrganizatora", "Organizator")" class="nav-link">Organizator</a>
                         <a href="@Url.Action("PrijavaS", "Sudija")" class="nav-link">Sudija</a>
                     }

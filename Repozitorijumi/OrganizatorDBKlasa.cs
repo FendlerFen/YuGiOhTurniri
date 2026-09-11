@@ -1,26 +1,24 @@
 using System;
 using System.Data;
 using System.Data.SqlClient;
+using KlasePodataka;
 
-namespace KlasePodataka
+namespace Repozitorijumi
 {
-    public class SPOrganizatorDBKlasa
+    public class OrganizatorDBKlasa : BazniRepozitorijum
     {
-        private string _konekcija;
-
-        public SPOrganizatorDBKlasa(string konekcija)
+        public OrganizatorDBKlasa(string konekcija) : base(konekcija)
         {
-            _konekcija = konekcija;
         }
 
         public OrganizatorKlasa Login(string email, string lozinka)
         {
-            using (SqlConnection conn = new SqlConnection(_konekcija))
+            using (SqlConnection conn = DajKonekciju())
             {
                 try
                 {
                     conn.Open();
-                    System.Diagnostics.Debug.WriteLine($"[DB LOGIN] Tra?im organizatora: Email='{email}', Lozinka du?ina={lozinka?.Length ?? 0}");
+                    System.Diagnostics.Debug.WriteLine($"[DB LOGIN] Trazim organizatora: Email='{email}', Lozinka duzina={lozinka?.Length ?? 0}");
 
                     string sql = "SELECT OrganizatorID, NazivOrganizacije, Ime, Prezime, Email, TelefonBroj, Drzava, Lozinka, DatumRegistracije FROM Organizatori WHERE Email = @email AND Lozinka = @lozinka";
 
@@ -34,7 +32,7 @@ namespace KlasePodataka
                         {
                             if (reader.Read())
                             {
-                                System.Diagnostics.Debug.WriteLine($"[DB LOGIN] PRONA?EN - ID={reader["OrganizatorID"]}, Email={reader["Email"]}");
+                                System.Diagnostics.Debug.WriteLine($"[DB LOGIN] PRONADEN - ID={reader["OrganizatorID"]}, Email={reader["Email"]}");
 
                                 return new OrganizatorKlasa
                                 {
@@ -51,7 +49,7 @@ namespace KlasePodataka
                             }
                             else
                             {
-                                System.Diagnostics.Debug.WriteLine($"[DB LOGIN] NIJE PRONA?EN - Nema rezultata za email='{email}'");
+                                System.Diagnostics.Debug.WriteLine($"[DB LOGIN] NIJE PRONADEN - Nema rezultata za email='{email}'");
                             }
                         }
                     }
@@ -68,7 +66,7 @@ namespace KlasePodataka
 
         public int Registruj(OrganizatorKlasa organizator)
         {
-            using (SqlConnection conn = new SqlConnection(_konekcija))
+            using (SqlConnection conn = DajKonekciju())
             {
                 try
                 {
@@ -106,7 +104,7 @@ namespace KlasePodataka
 
         public OrganizatorKlasa DajPoID(int organizatorID)
         {
-            using (SqlConnection conn = new SqlConnection(_konekcija))
+            using (SqlConnection conn = DajKonekciju())
             {
                 try
                 {

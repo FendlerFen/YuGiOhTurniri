@@ -25,6 +25,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Repozitorijumi", "Repozitor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prezentaciona Logika", "Prezentaciona Logika\Prezentaciona Logika.csproj", "{B328377A-4DCF-430C-88A7-1644E01D3CA4}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SQL i Skripta", "SQL i Skripta", "{F0691DB9-8A89-4901-8532-8A29AC85754D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KlaseMapiranja", "KlaseMapiranja\KlaseMapiranja.csproj", "{FE7D8C4B-308D-4231-AB63-1CB6C1DFBC8C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +63,10 @@ Global
 		{B328377A-4DCF-430C-88A7-1644E01D3CA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B328377A-4DCF-430C-88A7-1644E01D3CA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B328377A-4DCF-430C-88A7-1644E01D3CA4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE7D8C4B-308D-4231-AB63-1CB6C1DFBC8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE7D8C4B-308D-4231-AB63-1CB6C1DFBC8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE7D8C4B-308D-4231-AB63-1CB6C1DFBC8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE7D8C4B-308D-4231-AB63-1CB6C1DFBC8C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -71,6 +79,7 @@ Global
 		{22B7494C-42EF-42A5-87FC-DF847F07AE48} = {1315D51D-8C61-450B-9AD6-F02BE1040772}
 		{6DF13C90-5CB6-4244-92AD-9DA916CFC2B3} = {1315D51D-8C61-450B-9AD6-F02BE1040772}
 		{B328377A-4DCF-430C-88A7-1644E01D3CA4} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{FE7D8C4B-308D-4231-AB63-1CB6C1DFBC8C} = {8A348790-4B4F-441A-B907-0CC63F079496}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2650B0C0-4BA1-4213-9CFB-DC6E7DC7AD8A}

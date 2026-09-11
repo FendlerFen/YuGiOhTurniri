@@ -90,6 +90,7 @@
     <Compile Include="BanListaRepozitorijumEF.cs" />
     <Compile Include="BanListaRepozitorijumSP.cs" />
     <Compile Include="BanListaRepozitorijumTabela.cs" />
+    <Compile Include="BazniRepozitorijum.cs" />
     <Compile Include="IBanListaRepository.cs" />
     <Compile Include="ISpilRepozitorijum.cs" />
     <Compile Include="ITakmicarRepozitorijum.cs" />
@@ -99,25 +100,19 @@
     </Compile>
     <Compile Include="OrganizatorRepozitorijumSP.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="BanListaDBKlasa.cs" />
     <Compile Include="Spil.cs">
       <DependentUpon>SpilBazaModel1.tt</DependentUpon>
     </Compile>
-    <Compile Include="SpilBazaModel1.Context.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>SpilBazaModel1.Context.tt</DependentUpon>
-    </Compile>
-    <Compile Include="SpilBazaModel1.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>SpilBazaModel1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="SpilBazaModel1.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>SpilBazaModel1.edmx</DependentUpon>
-    </Compile>
+    <Compile Include="SpilBazaModel1.Context.cs" />
     <Compile Include="SpilRepozitorijumSP.cs" />
+    <Compile Include="SpilRepozitorijumSQL.cs" />
+    <Compile Include="OrganizatorDBKlasa.cs" />
+    <Compile Include="SpilDBKlasa.cs" />
+    <Compile Include="SudijaDBKlasa.cs" />
+    <Compile Include="SPTakmicarDBKlasa.cs" />
+    <Compile Include="TakmicarDBKlasa.cs" />
+    <Compile Include="TurnirDBKlasa.cs" />
     <Compile Include="TakmicarRepozitorijumSP.cs" />
     <Compile Include="TurnirRepozitorijumSP.cs" />
   </ItemGroup>

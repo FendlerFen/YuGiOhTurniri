@@ -14,7 +14,7 @@
             <div class="alert alert-danger">@ViewBag.Greska</div>
         }
 
-        @using (Html.BeginForm("RegistrujTakmicara", "Account", FormMethod.Post, new { @class = "form-validation" }))
+        @using (Html.BeginForm("RegistrujTakmicara", "Nalog", FormMethod.Post, new { @class = "form-validation" }))
         {
 
             <div class="form-group">
@@ -69,8 +69,7 @@
         }
 
         <div class="auth-link">
-            Vec imate nalog? <a href="@Url.Action("PrijaviTakmicara", "Account")">Prijavite se</a>
+            Vec imate nalog? <a href="@Url.Action("PrijaviTakmicara", "Nalog")">Prijavite se</a>
         </div>
     </div>
 </div>
-

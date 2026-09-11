@@ -4,9 +4,7 @@ using System.Data.SqlClient;
 
 namespace DBUtils
 {
-    /// <summary>
     /// Bazna klasa za rad sa bazom podataka kroz SQL konekciju
-    /// </summary>
     public class KonekcijaKlasa
     {
         private readonly string _konekcijskiString;
@@ -16,9 +14,7 @@ namespace DBUtils
             _konekcijskiString = konekcijskiString;
         }
 
-        /// <summary>
         /// Izvršava SELECT upit i vraća DataSet
-        /// </summary>
         public DataSet IzvrsiUpit(string sql)
         {
             DataSet ds = new DataSet();
@@ -38,9 +34,7 @@ namespace DBUtils
             return ds;
         }
 
-        /// <summary>
         /// Izvršava INSERT, UPDATE, DELETE i vraća broj promijenjenih redova
-        /// </summary>
         public int IzvrsiNeupit(string sql)
         {
             int rezultat = 0;
@@ -60,9 +54,7 @@ namespace DBUtils
             return rezultat;
         }
 
-        /// <summary>
         /// Izvršava upit i vraća skalarnu vrijednost (jedan podatak)
-        /// </summary>
         public object IzvrsiSkalar(string sql)
         {
             object rezultat = null;
@@ -82,9 +74,7 @@ namespace DBUtils
             return rezultat;
         }
 
-        /// <summary>
         /// Izvršava Stored Procedure
-        /// </summary>
         public DataSet IzvrsiStoredProceduru(string proceduraIme, SqlParameter[] parametri = null)
         {
             DataSet ds = new DataSet();

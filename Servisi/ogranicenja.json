@@ -1,0 +1,39 @@
+{
+  "minBrojKarataMain": 40,
+  "maxBrojKarataMain": 60,
+  "maxBrojKarataExtra": 15,
+  "maxBrojKarataSide": 15,
+  "maxBrojIsteKarte": 3,
+  "maxBrojTakmicara": 999,
+  "formati": [
+    {
+      "naziv": "TCG",
+      "opis": "Trading Card Game format"
+    },
+    {
+      "naziv": "OCG",
+      "opis": "Official Card Game format"
+    },
+    {
+      "naziv": "Speed Duel",
+      "opis": "Speed Duel format"
+    }
+  ],
+  "statusiSpila": [
+    {
+      "id": 1,
+      "naziv": "Na cekanju",
+      "opis": "Spil je sacuvan ali ceka reviziju"
+    },
+    {
+      "id": 2,
+      "naziv": "Odobren",
+      "opis": "Spil je odobren za turnire"
+    },
+    {
+      "id": 3,
+      "naziv": "Odbijen",
+      "opis": "Spil je odbijen"
+    }
+  ]
+}

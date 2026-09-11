@@ -17,14 +17,14 @@ namespace Repozitorijumi
 
         public List<TakmicarKlasa> DajSveTakmicara()
         {
-            var db = new SPTakmicarDBKlasa(_konekcija);
+            var db = new TakmicarDBKlasa(_konekcija);
             var ds = db.DajSveTakmicara();
             return MapirajDataSet(ds);
         }
 
         public TakmicarKlasa DajPoID(int id)
         {
-            var db = new SPTakmicarDBKlasa(_konekcija);
+            var db = new TakmicarDBKlasa(_konekcija);
             var dr = db.DajTakmicaraPoID(id);
 
             if (dr == null)
@@ -55,7 +55,7 @@ namespace Repozitorijumi
 
         public TakmicarKlasa Login(string email, string lozinka)
         {
-            var db = new SPTakmicarDBKlasa(_konekcija);
+            var db = new TakmicarDBKlasa(_konekcija);
             var dr = db.LoginTakmicar(email, lozinka);
 
             if (dr == null)

@@ -49,7 +49,7 @@ namespace YuGiOhTurniri.Models
     public class MainDeckKarta
     {
         public string NazivKarte { get; set; }
-        public string Tip { get; set; } // Monster, Spell, Trap
+        public string Tip { get; set; }
         public string Kolicina { get; set; }
     }
 
@@ -84,7 +84,7 @@ namespace YuGiOhTurniri.Models
         public string NazivKarte { get; set; }
         public string Sekcija { get; set; }
         public int Kolicina { get; set; }
-        public string TipKarte { get; set; } // Monster, Spell, Trap
+        public string TipKarte { get; set; } 
     }
 
     public class DodajKartuVM

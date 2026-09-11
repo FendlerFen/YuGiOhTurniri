@@ -1,23 +1,21 @@
-﻿using System;
+using System;
 using System.Data;
 using System.Data.SqlClient;
+using KlasePodataka;
 
-namespace KlasePodataka
+namespace Repozitorijumi
 {
-    public class SPTurnirDBKlasa
+    public class TurnirDBKlasa : BazniRepozitorijum
     {
-        private readonly string _stringKonekcije;
-
-        public SPTurnirDBKlasa(string noviStringKonekcije)
+        public TurnirDBKlasa(string noviStringKonekcije) : base(noviStringKonekcije)
         {
-            _stringKonekcije = noviStringKonekcije;
         }
 
         // SVI TURNIRI
         public DataSet DajSveTurnire()
         {
             DataSet ds = new DataSet();
-            using (SqlConnection konekcija = new SqlConnection(_stringKonekcije))
+            using (SqlConnection konekcija = DajKonekciju())
             {
                 konekcija.Open();
                 SqlCommand komanda = new SqlCommand(
@@ -32,7 +30,7 @@ namespace KlasePodataka
         public DataSet DajTurnireOrganizatora(int organizatorID)
         {
             DataSet ds = new DataSet();
-            using (SqlConnection konekcija = new SqlConnection(_stringKonekcije))
+            using (SqlConnection konekcija = DajKonekciju())
             {
                 konekcija.Open();
                 SqlCommand komanda = new SqlCommand(
@@ -48,7 +46,7 @@ namespace KlasePodataka
         public DataSet DajOtvoreneTurnire()
         {
             DataSet ds = new DataSet();
-            using (SqlConnection konekcija = new SqlConnection(_stringKonekcije))
+            using (SqlConnection konekcija = DajKonekciju())
             {
                 konekcija.Open();
                 SqlCommand komanda = new SqlCommand(
@@ -64,11 +62,10 @@ namespace KlasePodataka
         {
             try
             {
-                using (SqlConnection konekcija = new SqlConnection(_stringKonekcije))
+                using (SqlConnection konekcija = DajKonekciju())
                 {
                     konekcija.Open();
 
-                    // Prvo proveri da li je organizator validan
                     System.Diagnostics.Debug.WriteLine($"KreirajTurnir SQL: Naziv={turnir.Naziv}, OrganizatorID={turnir.OrganizatorID}, DatumOdrzavanja={turnir.DatumOdrzavanja}");
 
                     SqlCommand komanda = new SqlCommand(
@@ -103,7 +100,7 @@ namespace KlasePodataka
         // DOHVATI TURNIR
         public DataRow DajTurnirPoID(int turnirID)
         {
-            using (SqlConnection konekcija = new SqlConnection(_stringKonekcije))
+            using (SqlConnection konekcija = DajKonekciju())
             {
                 konekcija.Open();
                 SqlCommand komanda = new SqlCommand(
@@ -122,7 +119,7 @@ namespace KlasePodataka
         // PROGLASI POBEDNIKE
         public bool ProglasiPobednike(int turnirID, int prvoMestoID, int drugoMestoID, int treceMestoID)
         {
-            using (SqlConnection konekcija = new SqlConnection(_stringKonekcije))
+            using (SqlConnection konekcija = DajKonekciju())
             {
                 konekcija.Open();
                 SqlCommand komanda = new SqlCommand(
@@ -147,7 +144,7 @@ namespace KlasePodataka
         public DataSet DajPobednike(int turnirID)
         {
             DataSet ds = new DataSet();
-            using (SqlConnection konekcija = new SqlConnection(_stringKonekcije))
+            using (SqlConnection konekcija = DajKonekciju())
             {
                 konekcija.Open();
                 SqlCommand komanda = new SqlCommand(
@@ -161,10 +158,10 @@ namespace KlasePodataka
             return ds;
         }
 
-        // ZAVRŠI TURNIR
+        // ZAVRSI TURNIR
         public bool ZavrsiTurnir(int turnirID)
         {
-            using (SqlConnection konekcija = new SqlConnection(_stringKonekcije))
+            using (SqlConnection konekcija = DajKonekciju())
             {
                 konekcija.Open();
                 SqlCommand komanda = new SqlCommand(
@@ -174,16 +171,16 @@ namespace KlasePodataka
             }
         }
 
-        // DODAJ TAKMIČARA NA TURNIR
+        // DODAJ TAKMICARA NA TURNIR
         public bool DodajTakmicaraTurniru(int turnirID, int takmicarID, int spilID)
         {
             try
             {
-                using (SqlConnection konekcija = new SqlConnection(_stringKonekcije))
+                using (SqlConnection konekcija = DajKonekciju())
                 {
                     konekcija.Open();
 
-                    // Proveri da li je takmičar već registrovan na turniru
+                    // Provjeri da li je takmicara vec registrovan na turniru
                     SqlCommand provera = new SqlCommand(
                         "SELECT COUNT(*) FROM Prijave WHERE TurnirID = @turnirID AND TakmicarID = @takmicarID",
                         konekcija);
@@ -196,7 +193,7 @@ namespace KlasePodataka
                         return false; 
                     }
 
-                    // Proveri broj takmičara na turniru
+                    // Provjeri broj takmicara na turniru
                     SqlCommand brojTakmicara = new SqlCommand(
                         "SELECT COUNT(*) FROM Prijave WHERE TurnirID = @turnirID",
                         konekcija);
@@ -205,7 +202,7 @@ namespace KlasePodataka
 
                     if (trenutanBroj >= 999)
                     {
-                        throw new Exception("Turnir je dostignuo maksimalnu kapacitet od 999 takmičara! Ne možete da se prijavite.");
+                        throw new Exception("Turnir je dostignuo maksimalnu kapacitet od 999 takmicara! Ne mozete da se prijavite.");
                     }
 
                     // Dodaj u tabelu Prijave
@@ -234,7 +231,7 @@ namespace KlasePodataka
         {
             try
             {
-                using (SqlConnection konekcija = new SqlConnection(_stringKonekcije))
+                using (SqlConnection konekcija = DajKonekciju())
                 {
                     konekcija.Open();
                     SqlCommand komanda = new SqlCommand(
@@ -262,23 +259,23 @@ namespace KlasePodataka
         {
             try
             {
-                using (SqlConnection konekcija = new SqlConnection(_stringKonekcije))
+                using (SqlConnection konekcija = DajKonekciju())
                 {
                     konekcija.Open();
 
-                    // Prvo obriši sve prijave za ovaj turnir
+                    // Prvo obrisi sve prijave za ovaj turnir
                     SqlCommand obrisiPrijave = new SqlCommand(
                         "DELETE FROM Prijave WHERE TurnirID = @id", konekcija);
                     obrisiPrijave.Parameters.AddWithValue("@id", turnirID);
                     obrisiPrijave.ExecuteNonQuery();
 
-                    // Obriši sve rezultate za ovaj turnir
+                    // Obrisi sve rezultate za ovaj turnir
                     SqlCommand obrisiRezultate = new SqlCommand(
                         "DELETE FROM Rezultati WHERE TurnirID = @id", konekcija);
                     obrisiRezultate.Parameters.AddWithValue("@id", turnirID);
                     obrisiRezultate.ExecuteNonQuery();
 
-                    // Obriši turnir
+                    // Obrisi turnir
                     SqlCommand obrisiTurnir = new SqlCommand(
                         "DELETE FROM Turniri WHERE TurnirID = @id", konekcija);
                     obrisiTurnir.Parameters.AddWithValue("@id", turnirID);
@@ -293,13 +290,13 @@ namespace KlasePodataka
             }
         }
 
-        // DOHVATI TAKMIČARE NA TURNIRU
+        // DOHVATI TAKMICARA NA TURNIRU
         public DataSet DajTakmicareNaTurniru(int turnirID)
         {
             DataSet ds = new DataSet();
             try
             {
-                using (SqlConnection konekcija = new SqlConnection(_stringKonekcije))
+                using (SqlConnection konekcija = DajKonekciju())
                 {
                     konekcija.Open();
                     SqlCommand komanda = new SqlCommand(
@@ -327,7 +324,7 @@ namespace KlasePodataka
         {
             try
             {
-                using (SqlConnection konekcija = new SqlConnection(_stringKonekcije))
+                using (SqlConnection konekcija = DajKonekciju())
                 {
                     konekcija.Open();
                     SqlCommand komanda = new SqlCommand(
