@@ -361,5 +361,22 @@ namespace Repozitorijumi
                 }
             }
         }
+
+        public bool IzmeniSpil(SpilKlasa spil)
+        {
+            using (SqlConnection konekcija = DajKonekciju())
+            {
+                konekcija.Open();
+                string sql = @"UPDATE Spilovi SET Naziv = @Naziv, Format = @Format, Arhetip = @Arhetip 
+                              WHERE SpilID = @SpilID";
+                SqlCommand komanda = new SqlCommand(sql, konekcija);
+                komanda.Parameters.Add("@SpilID", SqlDbType.Int).Value = spil.SpilID;
+                komanda.Parameters.Add("@Naziv", SqlDbType.NVarChar).Value = spil.Naziv ?? "";
+                komanda.Parameters.Add("@Format", SqlDbType.NVarChar).Value = spil.Format ?? "";
+                komanda.Parameters.Add("@Arhetip", SqlDbType.NVarChar).Value = spil.Arhetip ?? "";
+
+                return komanda.ExecuteNonQuery() > 0;
+            }
+        }
     }
 }

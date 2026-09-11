@@ -19,19 +19,12 @@ namespace Servisa.Controllers
             {
                 ITakmicarRepozitorijum repo = new TakmicarRepozitorijumSP(_konekcija);
                 var takmicari = repo.DajSveTakmicara();
-
-                return Ok(new
-                {
-                    uspeh = true,
-                    kodStanja = 200,
-                    poruka = "Takmi?ari uspe?no preuzeti",
-                    broj = takmicari.Count,
-                    podaci = takmicari
-                });
+                return Ok(new { uspeh = true, kodStanja = 200, poruka = "Takmicari uspesno preuzeti", broj = takmicari.Count, podaci = takmicari });
             }
             catch (Exception ex)
             {
-                return InternalServerError(new Exception("Gre?ka: " + ex.Message));
+                return Content(System.Net.HttpStatusCode.InternalServerError,
+                    new { uspeh = false, kodStanja = 500, poruka = "Greska: " + ex.Message });
             }
         }
 
@@ -41,26 +34,16 @@ namespace Servisa.Controllers
         {
             try
             {
-                if (id <= 0)
-                    return BadRequest("ID mora biti ve?i od 0");
-
+                if (id <= 0) return BadRequest("ID mora biti veci od 0");
                 ITakmicarRepozitorijum repo = new TakmicarRepozitorijumSP(_konekcija);
                 var takmicar = repo.DajPoID(id);
-
-                if (takmicar == null)
-                    return NotFound();
-
-                return Ok(new
-                {
-                    uspeh = true,
-                    kodStanja = 200,
-                    poruka = "Takmi?ar prona?en",
-                    podaci = takmicar
-                });
+                if (takmicar == null) return NotFound();
+                return Ok(new { uspeh = true, kodStanja = 200, poruka = "Takmicar pronadjen", podaci = takmicar });
             }
             catch (Exception ex)
             {
-                return InternalServerError(new Exception("Gre?ka: " + ex.Message));
+                return Content(System.Net.HttpStatusCode.InternalServerError,
+                    new { uspeh = false, kodStanja = 500, poruka = "Greska: " + ex.Message });
             }
         }
 
@@ -70,91 +53,47 @@ namespace Servisa.Controllers
         {
             try
             {
+                if (takmicar == null) return BadRequest("Telo zahteva je prazno");
+                ITakmicarRepozitorijum repo = new TakmicarRepozitorijumSP(_konekcija);
+                int noviId = repo.Dodaj(takmicar);
+                if (noviId <= 0)
+                    return Content(System.Net.HttpStatusCode.BadRequest,
+                        new { uspeh = false, kodStanja = 400, poruka = "Registracija nije uspela" });
+                takmicar.TakmicarID = noviId;
+                return Content(System.Net.HttpStatusCode.Created,
+                    new { uspeh = true, kodStanja = 201, poruka = "Takmicar kreiran", podaci = takmicar });
+            }
+            catch (Exception ex)
+            {
+                return Content(System.Net.HttpStatusCode.InternalServerError,
+                    new { uspeh = false, kodStanja = 500, poruka = "Greska: " + ex.Message });
+            }
+        }
+
+        /// <summary>POST /api/takmicari/prijava</summary>
+        [Route("prijava")]
+        [HttpPost]
+        public IHttpActionResult Prijava([FromBody] dynamic model)
+        {
+            try
+            {
+                string email = model?.email ?? model?.Email;
+                string lozinka = model?.lozinka ?? model?.Lozinka;
+                if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(lozinka))
+                    return BadRequest("Email i lozinka su obavezni");
+
+                ITakmicarRepozitorijum repo = new TakmicarRepozitorijumSP(_konekcija);
+                var takmicar = repo.Login(email, lozinka);
                 if (takmicar == null)
-                    return BadRequest("Takmi?ar je obavezan");
+                    return Content(System.Net.HttpStatusCode.Unauthorized,
+                        new { uspeh = false, kodStanja = 401, poruka = "Pogresan email ili lozinka" });
 
-                if (string.IsNullOrWhiteSpace(takmicar.Email))
-                    return BadRequest("Email je obavezan");
-
-                ITakmicarRepozitorijum repo = new TakmicarRepozitorijumSP(_konekcija);
-                int noviID = repo.Dodaj(takmicar);
-
-                if (noviID <= 0)
-                    return BadRequest("Email ve? postoji");
-
-                takmicar.TakmicarID = noviID;
-
-                return Created(Request.RequestUri + "/" + noviID, new
-                {
-                    uspeh = true,
-                    kodStanja = 201,
-                    poruka = "Takmi?ar kreiran",
-                    podaci = takmicar
-                });
+                return Ok(new { uspeh = true, kodStanja = 200, poruka = "Prijava uspesna", podaci = takmicar });
             }
             catch (Exception ex)
             {
-                return InternalServerError(new Exception("Gre?ka: " + ex.Message));
-            }
-        }
-
-        [Route("{id:int}")]
-        [HttpPut]
-        public IHttpActionResult Izmeni(int id, [FromBody] TakmicarKlasa takmicar)
-        {
-            try
-            {
-                if (id <= 0)
-                    return BadRequest("ID mora biti ve?i od 0");
-
-                ITakmicarRepozitorijum repo = new TakmicarRepozitorijumSP(_konekcija);
-                var postojeci = repo.DajPoID(id);
-
-                if (postojeci == null)
-                    return NotFound();
-
-                takmicar.TakmicarID = id;
-                repo.Izmeni(id, takmicar);
-
-                return Ok(new
-                {
-                    uspeh = true,
-                    kodStanja = 200,
-                    poruka = "Takmi?ar a?uriran",
-                    podaci = takmicar
-                });
-            }
-            catch (Exception ex)
-            {
-                return InternalServerError(new Exception("Gre?ka: " + ex.Message));
-            }
-        }
-
-        [Route("{id:int}")]
-        [HttpDelete]
-        public IHttpActionResult Obrisi(int id)
-        {
-            try
-            {
-                if (id <= 0)
-                    return BadRequest("ID mora biti ve?i od 0");
-
-                ITakmicarRepozitorijum repo = new TakmicarRepozitorijumSP(_konekcija);
-                bool uspeh = repo.Obrisi(id);
-
-                if (!uspeh)
-                    return NotFound();
-
-                return Ok(new
-                {
-                    uspeh = true,
-                    kodStanja = 200,
-                    poruka = "Takmi?ar obrisan"
-                });
-            }
-            catch (Exception ex)
-            {
-                return InternalServerError(new Exception("Gre?ka: " + ex.Message));
+                return Content(System.Net.HttpStatusCode.InternalServerError,
+                    new { uspeh = false, kodStanja = 500, poruka = "Greska: " + ex.Message });
             }
         }
     }

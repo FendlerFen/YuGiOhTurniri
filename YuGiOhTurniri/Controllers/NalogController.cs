@@ -26,24 +26,32 @@ namespace YuGiOhTurniri.Controllers
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors);
                 string errorMessage = string.Join("; ", errors.Select(e => e.ErrorMessage));
-                ViewBag.Greska = "Greske pri validaciji: " + errorMessage;
+                ViewBag.Greska = "Gre?ke pri validaciji: " + errorMessage;
                 return View(model);
             }
 
-            // Prijava i dalje ide preko prezentacione logike (nema /api/login endpointa)
-            var forma = new FormaTakmicaraKlasa(_konekcija);
-            TakmicarKlasa takmicar = forma.LoginTakmicar(model.Email, model.Lozinka);
-
-            if (takmicar != null)
+            // Prijava - direktno iz baze
+            try
             {
-                Session["takmicarID"] = takmicar.TakmicarID;
-                Session["ime"] = takmicar.Ime;
-                Session["prezime"] = takmicar.Prezime;
-                Session["email"] = takmicar.Email;
-                return RedirectToAction("Index", "Takmicar");
+                var forma = new FormaTakmicaraKlasa(_konekcija);
+                TakmicarKlasa takmicar = forma.LoginTakmicar(model.Email, model.Lozinka);
+
+                if (takmicar != null)
+                {
+                    Session["takmicarID"] = takmicar.TakmicarID;
+                    Session["ime"] = takmicar.Ime;
+                    Session["prezime"] = takmicar.Prezime;
+                    Session["email"] = takmicar.Email;
+                    return RedirectToAction("Index", "Takmicar");
+                }
+
+                ViewBag.Greska = "Pogre?an email ili lozinka!";
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Greska = ex.Message ?? "Gre?ka pri loginu.";
             }
 
-            ViewBag.Greska = "Pogresan email ili lozinka!";
             return View(model);
         }
 
@@ -63,7 +71,7 @@ namespace YuGiOhTurniri.Controllers
                 return View(model);
             }
 
-            // Registracija preko REST API-ja: POST /api/takmicari
+            // Registracija - direktno u bazu
             var takmicar = new TakmicarKlasa
             {
                 Ime = model.Ime,
@@ -77,18 +85,23 @@ namespace YuGiOhTurniri.Controllers
 
             try
             {
-                var kreirajTask = _httpServis.KreirajTakmicaraAsync(takmicar);
-                kreirajTask.Wait();
-                int noviID = kreirajTask.Result;
+                var forma = new FormaTakmicaraKlasa(_konekcija);
+                string poruka = forma.RegistrujTakmicaraSaPorukom(takmicar);
 
-                ViewBag.Poruka = "Takmi?ar uspe?no registrovan! Molim vas prijavite se.";
-                return View("../Nalog/PrijaviTakmicara");
+                if (poruka.Contains("uspe?no"))
+                {
+                    ViewBag.Poruka = poruka;
+                    return RedirectToAction("PrijaviTakmicara");
+                }
+
+                ViewBag.Greska = poruka;
             }
             catch (Exception ex)
             {
-                ViewBag.Greska = ex.Message ?? "Registracija nije uspela.";
-                return View(model);
+                ViewBag.Greska = ex.Message ?? "Gre?ka pri registraciji.";
             }
+
+            return View(model);
         }
 
         public ActionResult Logout()

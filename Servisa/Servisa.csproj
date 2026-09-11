@@ -123,6 +123,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\KlasePodataka\KlasePodataka.csproj">
+      <Project>{22B7494C-42EF-42A5-87FC-DF847F07AE48}</Project>
+      <Name>KlasePodataka</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Repozitorijumi\Repozitorijumi.csproj">
+      <Project>{6DF13C90-5CB6-4244-92AD-9DA916CFC2B3}</Project>
+      <Name>Repozitorijumi</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
@@ -155,9 +165,11 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
-    <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\BanListaApiController.cs" />
+    <Compile Include="Controllers\OrganizatorApiController.cs" />
+    <Compile Include="Controllers\SpilApiController.cs" />
     <Compile Include="Controllers\TakmicarApiController.cs" />
-    <Compile Include="Controllers\ValuesController.cs" />
+    <Compile Include="Controllers\TurnirApiController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

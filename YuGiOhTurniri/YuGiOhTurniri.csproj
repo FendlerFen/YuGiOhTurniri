@@ -183,6 +183,7 @@
     <Compile Include="Controllers\OrganizatorController.cs" />
     <!-- Removed Doma?a Controller -->
     <Compile Include="Controllers\SudijaController.cs" />
+    <Compile Include="Controllers\TakmicarController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

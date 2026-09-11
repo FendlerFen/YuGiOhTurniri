@@ -137,19 +137,7 @@ namespace Repozitorijumi
         public bool Izmeni(SpilKlasa spil)
         {
             SpilDBKlasa db = new SpilDBKlasa(_konekcija);
-            using (System.Data.SqlClient.SqlConnection konekcija = new System.Data.SqlClient.SqlConnection(_konekcija))
-            {
-                konekcija.Open();
-                string sql = @"UPDATE Spilovi SET Naziv = @Naziv, Format = @Format, Arhetip = @Arhetip 
-                              WHERE SpilID = @SpilID";
-                System.Data.SqlClient.SqlCommand komanda = new System.Data.SqlClient.SqlCommand(sql, konekcija);
-                komanda.Parameters.Add("@SpilID", System.Data.SqlDbType.Int).Value = spil.SpilID;
-                komanda.Parameters.Add("@Naziv", System.Data.SqlDbType.NVarChar).Value = spil.Naziv ?? "";
-                komanda.Parameters.Add("@Format", System.Data.SqlDbType.NVarChar).Value = spil.Format ?? "";
-                komanda.Parameters.Add("@Arhetip", System.Data.SqlDbType.NVarChar).Value = spil.Arhetip ?? "";
-
-                return komanda.ExecuteNonQuery() > 0;
-            }
+            return db.IzmeniSpil(spil);
         }
 
         private SpilKlasa MapirajRed(DataRow r)
